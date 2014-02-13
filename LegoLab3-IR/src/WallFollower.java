@@ -16,19 +16,20 @@ public class WallFollower {
 	public static void main(String[] args) throws InterruptedException
 	{
 		
-		 int distance, desire = 35, dprev = 0, dx;
+		 int distance, desire = 35, error, dprev = 0, dx;
 		 lejos.nxt.UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
 		 LCD.drawString("BIPBUP: ", 0, 1);
 		 dprev = us.getDistance();
 		 
 		 while(true)
 		 {
-			 rightMotor.forward();
-			 leftMotor.forward();
+			 //rightMotor.forward();
+			 //leftMotor.forward();
 			 distance = us.getDistance();
+			 error = (desire - distance)/2;
 			 dx = distance-dprev;
 			 dprev = distance;
-			 if (distance<=desire) // Close to the wall
+			 /*if (distance<=desire) // Close to the wall
 			    {
 			      if (distance<=desire-15)
 			      {
@@ -57,7 +58,9 @@ public class WallFollower {
 
 			      }
 			      
-			    }
+			    }*/
+			 
+			 Car.forward(80+error, 80-error);
 			 Thread.sleep(30);
 		 }
 	}
