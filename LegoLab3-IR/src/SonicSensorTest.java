@@ -20,14 +20,16 @@ public class SonicSensorTest
    {
 	   
        UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
-
+       
+       
+       
        LCD.drawString("Distance(cm) ", 0, 0);
 	   
        while (! Button.ESCAPE.isDown())
        {
            LCD.drawInt(us.getDistance(),3,13,0);
 
-           Thread.sleep(300);
+           Thread.sleep(0); // Values changed to 300,1000, 100, 30, 5, 0
        }
        LCD.clear();
        LCD.drawString("Program stopped", 0, 0);

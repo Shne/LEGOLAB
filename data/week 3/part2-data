@@ -1,0 +1,41 @@
+1000 ms sleep
+
+screen
+
+real	meas
+10		13
+30		30
+60		60
+86		86
+
+100 ms sleep
+
+real	meas
+10		13
+30		30
+60		60
+86		86
+
+30 ms sleep
+
+real	meas
+10		13
+30		30
+60		60
+86		86
+
+5 ms sleep
+
+real	meas
+10		13
+30		30
+60		60
+86		86
+
+0 ms sleep
+
+real	meas
+10		13
+30		30
+60		60
+86		86
