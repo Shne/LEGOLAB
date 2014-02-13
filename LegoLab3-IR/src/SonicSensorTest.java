@@ -23,7 +23,7 @@ public class SonicSensorTest
        
        
        
-       LCD.drawString("Distance(cm) ", 0, 0);
+       LCD.drawString("Distance(cm)", 0, 0);
 	   
        while (! Button.ESCAPE.isDown())
        {

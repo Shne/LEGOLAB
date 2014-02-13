@@ -1,0 +1,10 @@
+long dist
+Wall works
+
+bottle does nothing at all
+
+piece of cardboard is detectable, but not reliable
+
+giant flower pot works up to about ~150 cm, sample time irrelevant
+
+Theoretical we can only take a sample once each 2*dist(m)/343m/s
