@@ -1,0 +1,9 @@
+Baseline; Oscilates, kinda slow
+
+Gain; Straight up speed
+
+Min power: 60 is required for running car, low reduces oscilation, high gives lots of osci
+
+Reaction time; changes oscilation frequency
+
+Controller is pure potential
