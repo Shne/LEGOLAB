@@ -18,31 +18,47 @@ public class Tracker
   {
      UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
      final int  noObject = 255;
-     int distance,
+     int distance, 
          desiredDistance = 35, // cm
          power, 
-         minPower = 60; // 60, 0, 100
-     float error, gain = 0.5f; //2.5f, 0.5f, .1f
-	  
+         minPower = 30,
+         dt = 30; // 60, 0, 100
+     float error, pgain = 10.0f,dgain = 120.0f, igain = 0.0001f, lastError = 0,delta = 0.0f, integral = 0.0f; //2.5f, 0.5f, .1f
+	 
+     boolean last = true;
      LCD.drawString("Distance: ", 0, 1);
      LCD.drawString("Power:    ", 0, 2);
 	   
      while (! Button.ESCAPE.isDown())
      {		   
          distance = us.getDistance();
+        
 		 
          if ( distance != noObject ) 
          {
              error = distance - desiredDistance;
-             power = (int)(gain * error);
+             integral += error*dt;
+             delta = (error - lastError)/dt;
+             lastError = error;
+             power = (int)(pgain * error+ delta*dgain + igain*integral);
              if ( error > 0 )
              { 
+            	 if(last)
+            	 {
+            		 last = false;
+            		 integral = 0; 
+            	 }
                  power = Math.min(minPower + power,100);
                  Car.forward(power,power);
                  LCD.drawString("Forward ", 0, 3);
              }
              else 
              {
+            	 if(!last)
+            	 {
+            		 last = true;
+            		 integral = 0; 
+            	 }
                  power = Math.min(minPower + Math.abs(power),100);
                  Car.backward(power, power);
 		         LCD.drawString("Backward", 0, 3);
@@ -54,7 +70,7 @@ public class Tracker
          else
              Car.forward(100, 100);
 		 
-         Thread.sleep(30); // 300, 3000, 30
+         Thread.sleep(dt); // 300, 3000, 30
      }
 	 
      Car.stop();
