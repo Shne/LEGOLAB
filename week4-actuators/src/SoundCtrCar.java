@@ -24,11 +24,28 @@ public class SoundCtrCar
         while ( soundLevel < soundThreshold );
     }
 
-    public static void main(String [] args) throws Exception
+    public static void main(String [] args) throws Throwable
     {
         LCD.drawString("dB level: ",0,0);
         LCD.refresh();
-	   	   
+	   	
+        Button.ESCAPE.addButtonListener(new ButtonListener() {
+			
+			public void buttonReleased(Button b) {
+				try{
+				exit();
+				} catch(Throwable t) {
+					
+				}
+				
+			}
+			
+			public void buttonPressed(Button b) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+        
         while (! Button.ESCAPE.isDown())
         {
             waitForLoudSound();		    			   
@@ -47,6 +64,16 @@ public class SoundCtrCar
             LCD.drawString("Stop    ",0,1); 
             Car.stop();
        }
-
+        exit();
    }
+    
+   public static void exit() throws Throwable
+   {
+       Car.stop();
+       LCD.clear();
+       LCD.drawString("Program stopped", 0, 0);
+       Thread.sleep(2000);
+       System.exit(0);
+   }
+   
 }
