@@ -20,12 +20,15 @@ public class SoundSensorTest
    {
 	   
        SoundSensor us = new SoundSensor(SensorPort.S1);
+       SoundSensor us2 = new SoundSensor(SensorPort.S2);
 
        LCD.drawString("DB ", 0, 0);
 	   int i  = 0;
        while (! Button.ESCAPE.isDown())
        {
-           LCD.drawInt(us.readValue(),3,13,i++%8);
+           LCD.drawInt(us.readValue(),3,13,0);
+           LCD.drawInt(us2.readValue(),3,13,1);
+           
 
            Thread.sleep(125);
        }
