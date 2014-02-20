@@ -8,14 +8,16 @@ import lejos.nxt.*;
  */
 public class SoundCtrCar 
 {
-    private static int soundThreshold = 90;
+    private static int soundThreshold = 85;
+    private static int soundThresholdLow = 50;
     private static SoundSensor sound = new SoundSensor(SensorPort.S1);
 	
     private static  void waitForLoudSound() throws Exception
     {
         int soundLevel;
 
-        Thread.sleep(500);
+        Thread.sleep(50);
+
         do
         {
             soundLevel = sound.readValue();
@@ -23,7 +25,46 @@ public class SoundCtrCar
         }
         while ( soundLevel < soundThreshold );
     }
+ 
+    private static  void waitForNoLoudSound() throws Exception
+    {
+        int soundLevel;
 
+        Thread.sleep(50);
+     
+        do
+        {
+            soundLevel = sound.readValue();
+            LCD.drawInt(soundLevel,4,10,0); 
+        }
+        while ( soundLevel > soundThresholdLow );
+    }
+    
+    private static  void waitForClap() throws Exception
+    {
+ 
+
+        Thread.sleep(500);
+        long time;
+        do
+        {
+        	
+        	waitForNoLoudSound();
+        	waitForLoudSound();
+        	time = System.currentTimeMillis();
+        	waitForNoLoudSound();
+        	long dt = System.currentTimeMillis()-time;
+        	LCD.drawInt((int)dt,5,10,2); 
+            if(dt <= 200)
+            {
+            	break;
+            }
+        }
+        while (true);
+    }
+    
+ 
+    
     public static void main(String [] args) throws Throwable
     {
         LCD.drawString("dB level: ",0,0);
@@ -48,19 +89,19 @@ public class SoundCtrCar
         
         while (! Button.ESCAPE.isDown())
         {
-            waitForLoudSound();		    			   
+        	waitForClap();		    			   
             LCD.drawString("Forward ",0,1);
             Car.forward(100, 100);
 		    
-            waitForLoudSound();		    			   
+            waitForClap();		    			   
             LCD.drawString("Right   ",0,1);
             Car.forward(100, 0);
 		    
-            waitForLoudSound();		    			   
+            waitForClap();		    			   
             LCD.drawString("Left    ",0,1);
             Car.forward(0, 100);
 		    
-            waitForLoudSound();		    			   
+            waitForClap();		    			   
             LCD.drawString("Stop    ",0,1); 
             Car.stop();
        }
