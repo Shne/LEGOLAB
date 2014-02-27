@@ -12,16 +12,14 @@ import lejos.nxt.*;
  * @author  Ole Caprani
  * @version 20.02.13
  */
-public class BlackWhiteGreenSensor {
+public class BlackWhiteSensor {
 
    private LightSensor ls; 
    private int blackLightValue;
    private int whiteLightValue;
-   private int blackGreenThreshold;
-   private int greenWhiteThreshold;
-   private int greenLightValue;
+   private int blackWhiteThreshold;
 
-   public BlackWhiteGreenSensor(SensorPort p)
+   public BlackWhiteSensor(SensorPort p)
    {
 	   ls = new LightSensor(p); 
 	   // Use the light sensor as a reflection sensor
@@ -49,29 +47,26 @@ public class BlackWhiteGreenSensor {
    public void calibrate()
    {
 	   blackLightValue = read("black");
-	   greenLightValue = read("green");
 	   whiteLightValue = read("white");
 	   // The threshold is calculated as the median between 
 	   // the two readings over the two types of surfaces
-	   blackGreenThreshold = (blackLightValue+greenLightValue)/2;
-	   greenWhiteThreshold = (greenLightValue+whiteLightValue)/2;
+	   blackWhiteThreshold = (blackLightValue+whiteLightValue)/2;
    }
    
    public boolean black() {
-           return (ls.readValue()< blackGreenThreshold);
+           return (ls.readValue()< blackWhiteThreshold);
    }
    
    public boolean white() {
-	   return (ls.readValue() > greenWhiteThreshold);
-   }
-   
-   public boolean green() {
-	   int v = ls.readValue();
-	   return (v>blackGreenThreshold && v < greenWhiteThreshold);
+	   return (ls.readValue()> blackWhiteThreshold);
    }
    
    public int light() {
  	   return ls.readValue();
+   }
+   
+   public int calibbi(){
+	   return blackWhiteThreshold;
    }
    
 }
