@@ -4,7 +4,7 @@ import lejos.nxt.SensorPort;
 
 public class ColorCalibbiUser {
 	public static void main(String[] args) throws Throwable {
-		LCD.drawString("RDY", 0, 0);
+	/*	LCD.drawString("RDY", 0, 0);
 		Button.ENTER.waitForPress();
 		BlackWhiteGreenSensor s = new BlackWhiteGreenSensor(SensorPort.S1);
 		s.calibrate();
@@ -19,7 +19,7 @@ public class ColorCalibbiUser {
 			}
 
 			Thread.sleep(100);
-		}
+		}*/
 
 	}
 }
