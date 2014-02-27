@@ -11,7 +11,7 @@ import lejos.nxt.*;
  * 
  * @author  Ole Caprani
  * @version 20.02.13
- */
+ *//*
 public class LineFollowerCal
 {
   public static void main (String[] aArg)
@@ -45,4 +45,4 @@ public class LineFollowerCal
      LCD.drawString("Program stopped", 0, 0);
      LCD.refresh();
    }
-}
+}*/
