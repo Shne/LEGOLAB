@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import lejos.nxt.*;
 import lejos.nxt.comm.BTConnection;
 import lejos.nxt.comm.Bluetooth;
+import lejos.robotics.Color;
 
 /**
  * A controller for a self-balancing Lego robot with a light sensor on port 2.
@@ -31,10 +32,11 @@ public class Sejway {
 	int prev_error;
 	float int_error;
 
-	LightSensor ls;
+	ColorSensor ls;
 
 	public Sejway() {
-		ls = new LightSensor(SensorPort.S2, true);
+		ls = new ColorSensor(SensorPort.S2);
+		ls.setFloodlight(Color.WHITE);
 	}
 
 	public void getBalancePos() {
@@ -42,7 +44,7 @@ public class Sejway {
 		// Wait for user to balance and press orange button
 		while (!Button.ENTER.isDown()) {
 			// NXTway must be balanced.
-			offset = ls.readNormalizedValue();
+			offset = ls.getRawLightValue();
 			LCD.clear();
 			LCD.drawInt(offset, 2, 4);
 			LCD.refresh();
@@ -51,7 +53,7 @@ public class Sejway {
 
 	public void pidControl() throws InterruptedException {
 		while (!Button.ESCAPE.isDown()) {
-			int normVal = ls.readNormalizedValue();
+			int normVal = ls.getRawLightValue();
 
 			// Proportional Error:
 			int error = normVal - offset;
