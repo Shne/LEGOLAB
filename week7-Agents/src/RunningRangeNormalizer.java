@@ -12,4 +12,10 @@ public class RunningRangeNormalizer extends RangeNormalizer {
 			low = val;
 		super.set(val);
 	}
+	
+	public float handle(float val)
+	{
+		set(val);
+		return get();
+	}
 }

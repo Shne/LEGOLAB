@@ -13,5 +13,11 @@ public class AlphaNormalizer {
 			_val = _val * (1.0f - alpha) + alpha * val;
 		}
 	}
+	
+	public float handle(float val)
+	{
+		set(val);
+		return get();
+	}
 
 }

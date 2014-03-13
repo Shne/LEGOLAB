@@ -14,5 +14,10 @@ public class MinpowerNormalizer {
 			val = 0.0f;
 		_val = low + (high - low) * val / 100.0f;
 	}
-
+	
+	public float handle(float val)
+	{
+		set(val);
+		return get();
+	}
 }
