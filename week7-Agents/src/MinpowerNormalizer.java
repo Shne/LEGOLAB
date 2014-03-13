@@ -8,11 +8,11 @@ public class MinpowerNormalizer {
 	}
 
 	public void set(float val) {
-		if (val > 1.0f)
-			val = 1.0f;
+		if (val > 100.0f)
+			val = 100.0f;
 		if (val < 0.0f)
 			val = 0.0f;
-		_val = low + (high - low) * val;
+		_val = low + (high - low) * val / 100.0f;
 	}
 
 }
