@@ -17,7 +17,7 @@ public class RobotFigure9_9 {
     	
     	CarDriver cd = new CarDriver();
     	
-    	//Escape escape = new Escape(car[0]);
+    	Escape escape = new Escape(car[0]);
     	Avoid avoid   = new Avoid(car[1]);
     	Follow follow = new Follow(car[2]);
     	Cruise cruise = new Cruise(car[3]);
@@ -30,12 +30,14 @@ public class RobotFigure9_9 {
         arbiter.setDaemon(true);	    
         arbiter.start();
         avoid.setDaemon(true);
-        avoid.start();
+        //avoid.start();
         follow.setDaemon(true);
         follow.start();
         cruise.setDaemon(true);
         cruise.start();
-	    	      
+        escape.setDaemon(true);
+        escape.start();
+        
         while ( ! Button.ESCAPE.isDown())
         {	
             LCD.drawString("Winner " + arbiter.winner(), 0, 3);
