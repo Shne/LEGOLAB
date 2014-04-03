@@ -12,8 +12,9 @@ class Follow extends Thread
 {
     private SharedCar car = new SharedCar();
 
-	private int power = 70, ms = 500;
+	private int power = 60, ms = 100;
 	LightSensor light = new LightSensor(SensorPort.S4);
+	NXTRegulatedMotor motor = new NXTRegulatedMotor(MotorPort.A);
 	
 	int frontLight, leftLight, rightLight, delta;
 	int lightThreshold;
@@ -41,24 +42,22 @@ class Follow extends Thread
 	    	while ( frontLight > lightThreshold )
 	    	{
 	    		// Get the light to the left
-	    		car.forward(0, power);
-	    		Delay.msDelay(ms);
+	    		motor.rotateTo(20);
 	    		leftLight = light.getLightValue();
 	    		
 	    		// Get the light to the right
-	    		car.backward(0, power);
-	    		Delay.msDelay(ms);
-    		    car.forward(power, 0);
-	    		Delay.msDelay(ms);
+	    		motor.rotateTo(-20);
 	    		rightLight = light.getLightValue();
 	    		
 	    		// Turn back to start position
-	    		car.backward(power, 0);
+	    		motor.rotateTo(0);
 	    		Delay.msDelay(ms);
+	    		
+	    		motor.stop();
 	    	
 	    		// Follow light for a while
 	    		delta = leftLight-rightLight;
-	    		car.forward(power-delta, power+delta);
+	    		car.forward(power+delta, power-delta);
 	    		Delay.msDelay(ms);
     		
 	    		frontLight = light.getLightValue();

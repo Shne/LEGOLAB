@@ -30,7 +30,7 @@ public class RobotFigure9_9 {
         arbiter.setDaemon(true);	    
         arbiter.start();
         avoid.setDaemon(true);
-        avoid.start();
+        //avoid.start();
         follow.setDaemon(true);
         follow.start();
         cruise.setDaemon(true);
