@@ -32,11 +32,11 @@ public class DubCar {
 		}.start();
 		
 		//move onto the line
-		p.travel(10);
+		p.travel(5);
 		p.die();
 		
 		//first incline
-		Linetrack(3850);
+		Linetrack(3750);
 		
 		//first platform
 		p.reset();
@@ -64,12 +64,6 @@ public class DubCar {
 		//3rd incline down
 		Linetrack(3350);
 		
-		//cheatsy-doodles
-		//p.reset();
-		//p.rotate(-92);
-		//p.travel(80);
-		//p.die();
-		
 		//2nd platform down
 		p.reset();
 		p.travelArc(-18.5, 19.2 * PI);
@@ -80,7 +74,7 @@ public class DubCar {
 		
 		//1st platform down
 		p.reset();
-		p.travelArc(18.5, 19.0 * PI);
+		p.travelArc(18.5, 18.8 * PI);
 		p.die();
 		
 		//1st incline down
