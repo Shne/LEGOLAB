@@ -11,7 +11,9 @@ public class DubCar {
 
 	public static void main(String[] aArg) throws Throwable {
 		DifferentialPilot2 p = new DifferentialPilot2(8.2, 11.5, m2, m1);
-		p.setTravelSpeed(20);
+		p.setAcceleration(60);
+		p.setTravelSpeed(50);
+		p.setRotateSpeed(100);
 		Button.ENTER.waitForPress();
 		new Thread() {
 			public void run() {
@@ -32,21 +34,65 @@ public class DubCar {
 		// p.travel(5);
 		// p.travelArc(-18.5, 0.01 * PI);
 		// p.die();
-		Linetrack(4000);
 		
+		//first incline
+		Linetrack(4000); 
+		
+		//first platform
 		p.reset();
 		p.travel(10);
 		p.travelArc(-18.5, 19.2 * PI);
 		p.die();
-		//m1.resetTachoCount();
-		//m2.resetTachoCount();
+		
+		//second incline
+		Linetrack(3750);
+		
+		//second platform
+		p.reset();
+		p.travel(10);
+		p.travelArc(18.5, 19.2 * PI);
+		p.die();
+		
+		//third incline
+		Linetrack(3700);
+		
+		//top platform
+		p.reset();
+		p.travel(30);
+		p.rotate(185);
+		p.travel(30);
+		p.die();
+		
+		//3rd incline down
+		Linetrack(3600);
+		
+		//cheatsy-doodles
 		//p.reset();
+		//p.rotate(-92);
+		//p.travel(80);
+		//p.die();
+		
+		//2nd platform down
+		p.reset();
+		p.travel(10);
+		p.travelArc(-18.5, 19.2 * PI);
+		p.die();
+		
+		//2nd incline down
+		Linetrack(3650);
+		
+		//1st platform down
+		p.reset();
+		p.travel(10);
+		p.travelArc(18.5, 19.2 * PI);
+		p.die();
+		
+		//1st incline down
 		Linetrack(3800);
-
 	}
 
 	public static void Linetrack(int tacho) throws Throwable {
-		
+		tacho += m1.getTachoCount() + m2.getTachoCount();
 		LineFollowerCal.run = true;
 
 		while (!Button.ESCAPE.isDown()) {
@@ -57,6 +103,9 @@ public class DubCar {
 				LineFollowerCal.run = false;
 				m1.resetTachoCount();
 				m2.resetTachoCount();
+				m1.flt();
+				m2.flt();
+				Thread.sleep(100);
 				return;
 			}
 		}
