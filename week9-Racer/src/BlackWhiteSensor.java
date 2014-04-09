@@ -1,4 +1,5 @@
 import lejos.nxt.*;
+import lejos.nxt.addon.RCXLightSensor;
 /**
  * A sensor that is able to distinguish a black/dark surface
  * from a white/bright surface.
@@ -14,14 +15,14 @@ import lejos.nxt.*;
  */
 public class BlackWhiteSensor {
 
-   private LightSensor ls; 
+   private RCXLightSensor ls; 
    private int blackLightValue;
    private int whiteLightValue;
    private int blackWhiteThreshold;
 
    public BlackWhiteSensor(SensorPort p)
    {
-	   ls = new LightSensor(p); 
+	   ls = new RCXLightSensor(p); 
 	   // Use the light sensor as a reflection sensor
 	   ls.setFloodlight(true);
    }

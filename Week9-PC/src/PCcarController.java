@@ -34,8 +34,7 @@ public class PCcarController extends JFrame implements ActionListener
    private TextField PField = new TextField(10);
    private TextField IField = new TextField(10);
    private TextField DField = new TextField(10);
-   private TextField ScaleField = new TextField(10);
-   private TextField AjustField = new TextField(10);
+   private TextField TpField = new TextField(10);
      
    
    private NXTComm nxtComm;
@@ -86,26 +85,23 @@ public class PCcarController extends JFrame implements ActionListener
       
       p3.add(new JLabel("P:"));
       p3.add(PField);
-      PField.setText("600");
+      PField.setText("10000");
       
       p3.add(new JLabel("I:"));
       p3.add(IField);
-      IField.setText("80");
+      IField.setText("30");
       
       p3.add(new JLabel("D:"));
       p3.add(DField);
-      DField.setText("600");
+      DField.setText("200000");
       
       // holds other values
       JPanel p4 = new JPanel();
       
-      p4.add(new JLabel("Scale:"));
-      p4.add(ScaleField);
-      ScaleField.setText("100");
+      p4.add(new JLabel("TP:"));
+      p4.add(TpField);
+      TpField.setText("75");
       
-      p4.add(new JLabel("Ajust:"));
-      p4.add(AjustField);
-      AjustField.setText("2.5");
       
       // holds go button
       JPanel p5 = new JPanel();
@@ -166,13 +162,9 @@ public class PCcarController extends JFrame implements ActionListener
     	    int D = new Integer(DString).intValue();        
             dos.writeInt(D);
             
-            String ScaleString = ScaleField.getText();
+            String ScaleString = TpField.getText();
     	    int Scale = new Integer(ScaleString).intValue();        
             dos.writeInt(Scale);
-            
-            String AjustString = AjustField.getText();
-            float Ajust = new Float(AjustString).floatValue();
-            dos.writeFloat(Ajust);
             
             dos.flush();
          }
