@@ -47,7 +47,7 @@ public class LineFollowerCal {
 				integral = 0;
 				continue;
 			}
-			int error = s1.readValue() - s2.readValue()+3;
+			int error = s1.readValue() - s2.readValue();
 			//int error = sensor.light() -  offset;
 			LCD.drawInt(error, 4, 10, 2);
 			LCD.refresh();
