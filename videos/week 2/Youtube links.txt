@@ -1,5 +1,0 @@
-1000 ms: http://www.youtube.com/watch?v=Mb0egznNfvE
-500 ms: http://www.youtube.com/watch?v=k3DgjIG60jU
-100 ms: http://www.youtube.com/watch?v=xTw_IgdwXQI
-10 ms: http://www.youtube.com/watch?v=XGbjY0Qhw7I
-5 ms: http://www.youtube.com/watch?v=fICEsazgL-A
