@@ -4,12 +4,11 @@ import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
 import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
 //import lejos.robotics.MirrorMotor;
 import lejos.robotics.RegulatedMotor;
-import lejos.robotics.subsumption.Arbitrator;
-import lejos.robotics.subsumption.Behavior;
 
 /**
  * Demonstration of the Behavior subsumption classes.
@@ -47,8 +46,8 @@ class DriveForward implements Behavior {
 
 	private boolean _suppressed = false;
 
-	public boolean takeControl() {
-		return true; // this behavior always wants control.
+	public int takeControl() {
+		return 10; // this behavior always wants control.
 	}
 
 	public void suppress() {
@@ -94,10 +93,14 @@ class DetectWall implements Behavior {
 		}.start();
 	}
 
-	public boolean takeControl() {
-
-		return touch.isPressed() || touch2.isPressed() || distance < 25;
-	}
+	public int takeControl()
+	  {
+	    if (touch.isPressed() || touch2.isPressed() || distance < 25)
+	       return 100;
+	    if ( actionThread != null )
+	       return 50;
+	    return 0;
+	  }
 
 	public void suppress() {
 		if(actionThread != null)
@@ -127,8 +130,12 @@ class DetectWall implements Behavior {
 			}
 
 		} catch (InterruptedException e) {
-			return;
+			Sound.beep();
 		}
+		BumperCar.leftMotor.stop();
+		BumperCar.rightMotor.stop();
+		actionThread = null;
+		return;
 	}
 
 }
@@ -139,8 +146,10 @@ class Exit implements Behavior {
 
 	}
 
-	public boolean takeControl() {
-		return Button.ESCAPE.isPressed();
+	public int takeControl() {
+		if(Button.ESCAPE.isPressed())
+			return 300;
+		return 0;
 	}
 
 	public void suppress() {
