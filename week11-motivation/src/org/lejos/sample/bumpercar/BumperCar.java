@@ -72,18 +72,30 @@ class DetectWall implements Behavior {
 	private TouchSensor touch;
 	private TouchSensor touch2;
 	private UltrasonicSensor sonar;
+	private volatile int distance = 255;
 
 	public DetectWall() {
 		touch = new TouchSensor(SensorPort.S1);
-		touch2 = new TouchSensor(SensorPort.S1);
+		touch2 = new TouchSensor(SensorPort.S2);
 		sonar = new UltrasonicSensor(SensorPort.S3);
+		new Thread() {
+			public void run() {
+				while (true) {
+					sonar.ping();
+					distance = sonar.getDistance();
+					LCD.drawInt(distance, 0, 0);
+					try {
+						Thread.sleep(20);
+					} catch (Throwable t) {
+					}
+				}
+			}
+		}.start();
 	}
 
 	public boolean takeControl() {
-		sonar.ping();
 
-		return touch.isPressed() || touch2.isPressed()
-				|| sonar.getDistance() < 25;
+		return touch.isPressed() || touch2.isPressed() || distance < 25;
 	}
 
 	public void suppress() {
@@ -96,11 +108,10 @@ class DetectWall implements Behavior {
 												// backward
 		BumperCar.rightMotor.rotate(-360); // rotate C farther to make the turn
 	}
-	
+
 }
 
 class Exit implements Behavior {
-
 
 	public Exit() {
 
