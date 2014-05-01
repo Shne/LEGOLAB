@@ -73,6 +73,7 @@ class DetectWall implements Behavior {
 	private TouchSensor touch2;
 	private UltrasonicSensor sonar;
 	private volatile int distance = 255;
+	private Thread actionThread;
 
 	public DetectWall() {
 		touch = new TouchSensor(SensorPort.S1);
@@ -99,24 +100,35 @@ class DetectWall implements Behavior {
 	}
 
 	public void suppress() {
-		// Since this is highest priority behavior, suppress will never be
-		// called.
+		if(actionThread != null)
+		{
+			actionThread.interrupt();
+		}
 	}
 
 	public void action() {
-		BumperCar.leftMotor.backward();
-		BumperCar.rightMotor.backward();
-
 		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		}
-		BumperCar.leftMotor.stop();
-		BumperCar.rightMotor.stop();
+			actionThread = Thread.currentThread();
+			BumperCar.leftMotor.backward();
+			BumperCar.rightMotor.backward();
 
-		BumperCar.leftMotor.rotate(-180, true);// start Motor.A rotating
-												// backward
-		BumperCar.rightMotor.rotate(-360); // rotate C farther to make the turn
+			Thread.sleep(1000);
+
+			BumperCar.leftMotor.stop();
+			BumperCar.rightMotor.stop();
+
+			BumperCar.leftMotor.rotate(-180, true);// start Motor.A rotating
+													// backward
+			BumperCar.rightMotor.rotate(-360, true); // rotate C farther to make
+														// the turn
+
+			while (BumperCar.rightMotor.isMoving()) {
+				Thread.sleep(25);
+			}
+
+		} catch (InterruptedException e) {
+			return;
+		}
 	}
 
 }
