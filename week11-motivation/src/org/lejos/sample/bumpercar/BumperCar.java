@@ -104,6 +104,16 @@ class DetectWall implements Behavior {
 	}
 
 	public void action() {
+		BumperCar.leftMotor.backward();
+		BumperCar.rightMotor.backward();
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		}
+		BumperCar.leftMotor.stop();
+		BumperCar.rightMotor.stop();
+
 		BumperCar.leftMotor.rotate(-180, true);// start Motor.A rotating
 												// backward
 		BumperCar.rightMotor.rotate(-360); // rotate C farther to make the turn
