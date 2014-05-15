@@ -51,7 +51,7 @@ public class DrawingPanel extends JPanel {
 	
 	public void clear()
 	{
-		gfx.setColor(Color.BLACK);
+		gfx.setColor(Color.WHITE);
 		gfx.setComposite(AlphaComposite.Src);
 		gfx.clearRect(0, 0, PWIDTH, PHEIGHT);
 	}
