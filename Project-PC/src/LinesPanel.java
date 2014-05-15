@@ -1,16 +1,13 @@
 import java.awt.Color;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import lejos.geom.Line;
-import lejos.geom.Rectangle;
-import lejos.robotics.mapping.LineMap;
 import static java.lang.Math.*;
 
 public class LinesPanel extends DrawingPanel {
 
+	private static final long serialVersionUID = 2439767843L;
 	private ArrayList<Line> lines;
 
 	public LinesPanel(int width, int height) {
@@ -25,6 +22,10 @@ public class LinesPanel extends DrawingPanel {
 		new Thread() {
 			public void run() {
 				loop();
+			}
+
+			{
+				setDaemon(true);
 			}
 		}.start();
 	}
@@ -53,7 +54,7 @@ public class LinesPanel extends DrawingPanel {
 						miny = min(l.y1, min(l.y2, miny));
 					}
 
-					float lx = maxx - minx, ly =maxy - miny;
+					float lx = maxx - minx, ly = maxy - miny;
 
 					paintRect(0, 0, PWIDTH, PHEIGHT, Color.WHITE);
 
@@ -71,12 +72,6 @@ public class LinesPanel extends DrawingPanel {
 					System.out.println("BUO");
 					lines.wait();
 				}
-				if (false) {
-					throw new IOException();
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
