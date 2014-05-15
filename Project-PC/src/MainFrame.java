@@ -1,3 +1,5 @@
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -5,6 +7,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import lejos.geom.Line;
+import lejos.pc.comm.NXTComm;
+import lejos.pc.comm.NXTCommException;
+import lejos.pc.comm.NXTCommFactory;
+import lejos.pc.comm.NXTInfo;
 
 public class MainFrame extends JFrame {
 
@@ -14,20 +20,39 @@ public class MainFrame extends JFrame {
 	}
 
 	private void run() {
-		while (true) {
-			synchronized (lines) {
-				Random r = new Random();
-				lines.add(new Line(r.nextInt(500), r.nextInt(500), r
-						.nextInt(500), r.nextInt(500)));
-				lines.notifyAll();
-				System.out.println("BUO2");
+
+		try {
+			NXTComm nxt = NXTCommFactory
+					.createNXTComm(NXTCommFactory.BLUETOOTH);
+			NXTInfo info = new NXTInfo();
+			info.name = "KRISBOT";
+			info.deviceAddress = "00165317366A";
+			nxt.open(info);
+			DataInputStream input = new DataInputStream(nxt.getInputStream());
+			while (true) {
+				byte[] b = new byte[16];
+				input.read(b);
+				Line l = Serialization.DeSerializeLine(b);
+				
+				synchronized (lines) {
+					lines.add(l);
+					lines.notifyAll();
+					System.out.println("BUO2");
+				}
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		} catch (NXTCommException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 
