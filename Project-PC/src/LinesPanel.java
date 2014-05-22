@@ -73,7 +73,7 @@ public class LinesPanel extends DrawingPanel {
 					// paintImg(0, 0, getImg("map.png"));
 					update();
 					
-					BufferedImage outimg = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
+					BufferedImage outimg = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 					
 					this.paintComponent(outimg.getGraphics());
 					

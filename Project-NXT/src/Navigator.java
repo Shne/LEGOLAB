@@ -16,8 +16,15 @@ import lejos.nxt.comm.BTConnection;
 import lejos.nxt.comm.Bluetooth;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.*;
+ 
+import static java.lang.Math.*;
 
 public class Navigator {
+	
+	static private DifferentialPilot p = new DifferentialPilot(8.16, 15.85,
+			new NXTRegulatedMotor(MotorPort.A), new NXTRegulatedMotor(
+					MotorPort.C));
+	static private OdometryPoseProvider PP = new OdometryPoseProvider(p);
 
 	public static void main(String[] args) throws InterruptedException {
 		Button.ESCAPE.addButtonListener(new ButtonListener() {
@@ -29,7 +36,7 @@ public class Navigator {
 			}
 		});
 		Upload();
-		new Thread() {
+	/*	new Thread() {
 			public void run() {
 				while (true) {
 					try {
@@ -38,18 +45,20 @@ public class Navigator {
 					}
 				}
 			}
-		}.start();
-		DifferentialPilot p = new DifferentialPilot(8.16, 15.85,
-				new NXTRegulatedMotor(MotorPort.A), new NXTRegulatedMotor(
-						MotorPort.C));
+		}.start();*/
+		
 		p.setTravelSpeed(20.0);
-		p.setRotateSpeed(100.0);
+		p.setRotateSpeed(10.0);
 		p.setAcceleration(50);
 		lejos.robotics.navigation.Navigator n = new lejos.robotics.navigation.Navigator(
 				p, new OdometryPoseProvider(p));
 		// Button.ENTER.waitForPressAndRelease();
 		while (true) {
-			
+			n.addWaypoint(new Waypoint(0f,0f, 90.f));
+			n.addWaypoint(new Waypoint(0f,0f, 180.f));
+			n.addWaypoint(new Waypoint(0f,0f, 270.f));
+			n.addWaypoint(new Waypoint(0f,0f, 0.f));
+			n.followPath();
 			Thread.sleep(10000);
 		}
 		// Thread.sleep(1000000000);
@@ -68,10 +77,28 @@ public class Navigator {
 					DataOutputStream dos = con.openDataOutputStream();
 
 					while (true) {
-						Thread.sleep(15000);
+						Thread.sleep(1000);
 						int reading = ultron.getDistance();
 						if(reading == 255) continue;
-						Line l = new Line(-10, reading, 10, reading);
+						
+						Pose p = PP.getPose();
+						
+						double Lx = ((double)reading)*cos(toRadians(p.getHeading()));
+						double Ly = ((double)reading)*sin(toRadians(p.getHeading()));
+						
+						double Ll = sqrt(Lx*Lx+Ly*Ly);
+						
+						double LxT = -Ly/Ll*10d;
+						double LyT = Lx/Ll*10d;
+						
+						double Px1 = p.getX()+Lx+LxT;
+						double Px2 = p.getX()+Lx-LxT;
+						double Py1 = p.getY()+Ly+LyT;
+						double Py2 = p.getY()+Ly-LyT;
+						
+						
+						
+						Line l = new Line((float)Px1, (float)Py1, (float)Px2, (float)Py2);
 						dos.write(Serialization.SerializeLine(l));
 						dos.flush();
 					}
