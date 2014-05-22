@@ -37,8 +37,8 @@ public class MainFrame extends JFrame {
 				synchronized (lines) {
 					lines.add(l);
 					lines.notifyAll();
-					System.out.println("BUO2");
-					System.out.println(l);
+				//	System.out.println("BUO2");
+				//	System.out.println(l);
 				}
 				
 

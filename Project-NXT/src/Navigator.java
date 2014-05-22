@@ -62,37 +62,41 @@ public class Navigator {
 	public static void Upload() {
 		new Thread() {
 			public void run() {
-				try {
+				while (true) {
+					try {
 
-					BTConnection con = Bluetooth.waitForConnection();
-					DataOutputStream dos = con.openDataOutputStream();
-					Sound.beepSequence();
-					Point lastPoint = null;
-					while (true) {
-						Thread.sleep(200);
-						int reading = ultron.getDistance();
-						if (reading == 255) {
-							lastPoint = null;
-							continue;
+						BTConnection con = Bluetooth.waitForConnection();
+						DataOutputStream dos = con.openDataOutputStream();
+						Sound.beepSequence();
+						Point lastPoint = null;
+						while (true) {
+							Thread.sleep(200);
+							int reading = ultron.getDistance();
+							if (reading == 255) {
+								lastPoint = null;
+								continue;
+							}
+
+							Pose p = PP.getPose();
+
+							double Lx = ((double) reading)
+									* cos(toRadians(p.getHeading()));
+							double Ly = ((double) reading)
+									* sin(toRadians(p.getHeading()));
+							Point newPoint = new Point(p.getX() + (float) Lx,
+									p.getY() + (float) Ly);
+							if (lastPoint != null
+									&& lastPoint.distanceSq(newPoint) < 100f) {
+								Line l = new Line(lastPoint.x, lastPoint.y,
+										newPoint.x, newPoint.y);
+								dos.write(Serialization.SerializeLine(l));
+								dos.flush();
+							}
+							lastPoint = newPoint;
 						}
 
-						Pose p = PP.getPose();
-
-						double Lx = ((double) reading)
-								* cos(toRadians(p.getHeading()));
-						double Ly = ((double) reading)
-								* sin(toRadians(p.getHeading()));
-						Point newPoint = new Point(p.getX() + (float) Lx,
-								p.getY() + (float) Ly);
-						if (lastPoint != null && lastPoint.distanceSq(newPoint)<100f) {
-							Line l = new Line(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y);
-							dos.write(Serialization.SerializeLine(l));
-							dos.flush();
-						}
-						lastPoint = newPoint;
+					} catch (Throwable t) {
 					}
-
-				} catch (Throwable t) {
 				}
 			}
 
@@ -100,6 +104,7 @@ public class Navigator {
 				setDaemon(true);
 			}
 		}.start();
+
 	}
 
 }
