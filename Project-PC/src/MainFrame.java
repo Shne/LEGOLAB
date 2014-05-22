@@ -38,13 +38,9 @@ public class MainFrame extends JFrame {
 					lines.add(l);
 					lines.notifyAll();
 					System.out.println("BUO2");
+					System.out.println(l);
 				}
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				
 
 			}
 		} catch (NXTCommException e1) {
