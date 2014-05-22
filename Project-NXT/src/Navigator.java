@@ -9,7 +9,9 @@ import lejos.nxt.ButtonListener;
 import lejos.nxt.LCD;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.SensorPort;
 import lejos.nxt.Sound;
+import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.BTConnection;
 import lejos.nxt.comm.Bluetooth;
 import lejos.robotics.localization.OdometryPoseProvider;
@@ -47,31 +49,31 @@ public class Navigator {
 				p, new OdometryPoseProvider(p));
 		// Button.ENTER.waitForPressAndRelease();
 		while (true) {
-			n.addWaypoint(new Waypoint(new Point(50, 0)));
-			n.addWaypoint(new Waypoint(new Point(50, 50)));
-			n.addWaypoint(new Waypoint(new Point(0, 50)));
-			n.addWaypoint(new Waypoint(0, 0, 0));
-			n.followPath();
+			
 			Thread.sleep(10000);
 		}
 		// Thread.sleep(1000000000);
 	}
 
 	static Random rand = new Random();
-
+	
+	private static UltrasonicSensor ultron = new UltrasonicSensor(SensorPort.S1);
+	
 	public static void Upload() {
 		new Thread() {
 			public void run() {
 				try {
-					int counter = 0;
+					
 					BTConnection con = Bluetooth.waitForConnection();
 					DataOutputStream dos = con.openDataOutputStream();
 
 					while (true) {
-						Line l = new Line(1, 2, 3, 4);
+						Thread.sleep(15000);
+						int reading = ultron.getDistance();
+						if(reading == 255) continue;
+						Line l = new Line(-10, reading, 10, reading);
 						dos.write(Serialization.SerializeLine(l));
 						dos.flush();
-						Thread.sleep(1000);
 					}
 
 				} catch (Throwable t) {

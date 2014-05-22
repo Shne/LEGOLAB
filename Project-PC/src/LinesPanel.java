@@ -1,6 +1,10 @@
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import lejos.geom.Line;
 import static java.lang.Math.*;
@@ -68,6 +72,17 @@ public class LinesPanel extends DrawingPanel {
 
 					// paintImg(0, 0, getImg("map.png"));
 					update();
+					
+					BufferedImage outimg = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
+					
+					this.paintComponent(outimg.getGraphics());
+					
+					try {
+						ImageIO.write(outimg, "png", new File("map.png"));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 					System.out.println("BUO");
 					lines.wait();
