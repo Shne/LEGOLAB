@@ -26,7 +26,7 @@ public class LinesPanel extends DrawingPanel {
 	private ArrayList<Line> lines;
 	private ArrayList<Line> pathses = new ArrayList<Line>();
 	private ArrayList<Waypoint> waypoints;
-	public Pose pose;
+	public volatile Pose pose;
 
 	public LinesPanel(int width, int height) {
 		super(width, height);
@@ -69,7 +69,7 @@ public class LinesPanel extends DrawingPanel {
 				maxy + 1f));
 
 		ShortestPathFinder pather = new ShortestPathFinder(lm);
-		pather.lengthenLines(1f);
+		pather.lengthenLines(7f);
 		Path path = null;
 		try {
 			path = pather.findRoute(pose, new Waypoint(fx, fy));
@@ -120,6 +120,11 @@ public class LinesPanel extends DrawingPanel {
 						minx = min(pose.getX(), minx);
 						miny = min(pose.getY(), miny);
 					}
+					
+					maxx += 25f;
+					minx -= 25f;
+					maxy += 25f;
+					miny -= 25f;
 
 					lx = maxx - minx;
 					ly = maxy - miny;
@@ -148,6 +153,7 @@ public class LinesPanel extends DrawingPanel {
 					}
 
 					if (pose != null) {
+						System.out.println(pose.getX() + ", " +  pose.getY());
 						int x = (int) (((pose.getX() - minx) / lx) * PWIDTH);
 						int y = (int) (((pose.getY() - miny) / ly) * PHEIGHT);
 
