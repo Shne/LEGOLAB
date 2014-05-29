@@ -20,6 +20,12 @@ public class MainFrame extends JFrame {
 	public static void main(String[] args) {
 		final MainFrame f = new MainFrame();
 		f.NXTConnect();
+		new Thread(){
+			public void run()
+			{
+				f.runWaypoints();
+			}
+		}.start();
 		f.run();
 	}
 
@@ -50,10 +56,13 @@ public class MainFrame extends JFrame {
 				input.read(b);
 				Pair<Line, Pose> pair = Serialization.DeSerializeLinePose(b);
 
-				synchronized (lines) {
-					lines.add(pair.getFirst());
-					lines.notifyAll();
+				jerk:synchronized (lines) {
 					panel.pose = pair.getSecond();
+					if(!Double.isNaN(pair.getFirst().getX1()))
+					{
+						lines.add(pair.getFirst());
+					}
+					lines.notifyAll();				
 					// System.out.println("BUO2");
 					// System.out.println(l);
 				}
@@ -75,7 +84,7 @@ public class MainFrame extends JFrame {
 					output.flush();
 					for (Waypoint p : waypoints) {
 						byte[] b = Serialization.SerializeWaypoint(p);
-						output.write(b0);
+						output.write(b);
 						output.flush();
 					}
 				} catch (InterruptedException e) {

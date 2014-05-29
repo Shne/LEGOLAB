@@ -27,7 +27,7 @@ public class Navigator {
 	static private BTConnection con = Bluetooth.waitForConnection();
 	static private DataOutputStream dos;
 	static private DataInputStream dis;
-	
+
 	public static void main(String[] args) throws InterruptedException {
 		Button.ESCAPE.addButtonListener(new ButtonListener() {
 			public void buttonReleased(Button b) {
@@ -37,42 +37,51 @@ public class Navigator {
 				System.exit(0);
 			}
 		});
-		
+
 		dos = con.openDataOutputStream();
 		dis = con.openDataInputStream();
 		Upload();
-		/*
-		 * new Thread() { public void run() { while (true) { try {
-		 * Thread.sleep(Sound.playSample(new File("indy.wav"))); } catch
-	
-		 * (InterruptedException e) { } } } }.start();
-		 */
+
+		new Thread() {
+			public void run() {
+				while (true) {
+					try {
+						Thread.sleep(Sound.playSample(new File("indy.wav")));
+					} catch
+
+					(InterruptedException e) {
+					}
+				}
+			}
+		}.start();
 
 		p.setTravelSpeed(20.0);
 		p.setRotateSpeed(10.0);
 		p.setAcceleration(50);
 		lejos.robotics.navigation.Navigator n = new lejos.robotics.navigation.Navigator(
 				p, new OdometryPoseProvider(p));
+		p.rotate(1000000., true);
 		// Button.ENTER.waitForPressAndRelease();
 		byte[] b = new byte[24];
 		while (true) {
 			try {
 				dis.read(b);
-				Waypoint p = Serialization.DeSerializeWaypoint(b);
-				if(Double.isNaN(p.getX()))
-				{
+				Waypoint point = Serialization.DeSerializeWaypoint(b);
+				if (Double.isNaN(point.getX())) {
 					n.stop();
 					n.clearPath();
+					p.stop();
+					Sound.beepSequenceUp();
 				} else {
-					n.addWaypoint(p);
+					n.addWaypoint(point);
 					n.followPath();
 				}
-				
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 		// Thread.sleep(1000000000);
 	}
@@ -87,7 +96,6 @@ public class Navigator {
 				while (true) {
 					try {
 
-						
 						Sound.beepSequence();
 						Point lastPoint = null;
 						while (true) {
@@ -95,7 +103,7 @@ public class Navigator {
 							int reading = ultron.getDistance();
 							if (reading == 255) {
 								lastPoint = null;
-								continue;
+								// continue;
 							}
 
 							Pose p = PP.getPose();
@@ -110,6 +118,10 @@ public class Navigator {
 									&& lastPoint.distanceSq(newPoint) < 100f) {
 								Line l = new Line(lastPoint.x, lastPoint.y,
 										newPoint.x, newPoint.y);
+								dos.write(Serialization.SerializeLinePose(l, p));
+								dos.flush();
+							} else {
+								Line l = new Line(Float.NaN, Float.NaN, Float.NaN, Float.NaN);
 								dos.write(Serialization.SerializeLinePose(l, p));
 								dos.flush();
 							}
