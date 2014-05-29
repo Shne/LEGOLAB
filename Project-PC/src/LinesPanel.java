@@ -25,6 +25,8 @@ public class LinesPanel extends DrawingPanel {
 	private static final long serialVersionUID = 2439767843L;
 	private ArrayList<Line> lines;
 	private ArrayList<Line> pathses = new ArrayList<Line>();
+	private ArrayList<Waypoint> waypoints;
+	public Pose pose;
 
 	public LinesPanel(int width, int height) {
 		super(width, height);
@@ -32,9 +34,10 @@ public class LinesPanel extends DrawingPanel {
 		throw new IllegalAccessError();
 	}
 
-	public LinesPanel(int width, int height, ArrayList<Line> lines) {
+	public LinesPanel(int width, int height, ArrayList<Line> lines, ArrayList<Waypoint> waypoints) {
 		super(width, height);
 		this.lines = lines;
+		this.waypoints = waypoints;
 		new Thread() {
 			public void run() {
 				loop();
@@ -52,32 +55,29 @@ public class LinesPanel extends DrawingPanel {
 	}
 
 	protected void pathGen(int x, int y) {
-		float fx = minx + (maxx - minx) * ((float) x) / ((float) PWIDTH);
-		float fy = miny + (maxy - miny) * ((float) y) / ((float) PHEIGHT);
+		float fx = minx + (lx) * ((float) x) / ((float) PWIDTH);
+		float fy = miny + (ly) * ((float) y) / ((float) PHEIGHT);
 
 		System.out.println(fx);
 		System.out.println(fy);
 		ArrayList<Line> lines2 = new ArrayList<Line>();
-		for(Line l : lines)
-		{
+		for (Line l : lines) {
 			lines2.add(new Line(l.x1, l.y1, l.x2, l.y2));
 		}
-		LineMap lm = new LineMap(
-				((Line[]) lines2.toArray(new Line[lines2.size()])),
-				new Rectangle(minx - 1f, miny - 1f, maxx + 1f, maxy + 1f));
+		LineMap lm = new LineMap(((Line[]) lines2.toArray(new Line[lines2
+				.size()])), new Rectangle(minx - 1f, miny - 1f, maxx + 1f,
+				maxy + 1f));
 
 		ShortestPathFinder pather = new ShortestPathFinder(lm);
 		pather.lengthenLines(1f);
 		Path path = null;
 		try {
-			path = pather.findRoute(new Pose(minx + (maxx - minx) / 2f, miny
-					+ (maxy - miny) / 2f, 0f), new Waypoint(fx, fy));
+			path = pather.findRoute(pose, new Waypoint(fx, fy));
 		} catch (DestinationUnreachableException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Waypoint l = new Waypoint(new Pose(minx + (maxx - minx) / 2f, miny
-				+ (maxy - miny) / 2f, 0f));
+		Waypoint l = new Waypoint(pose);
 		synchronized (pathses) {
 			pathses.clear();
 			for (Waypoint p : path) {
@@ -87,9 +87,14 @@ public class LinesPanel extends DrawingPanel {
 				l = p;
 			}
 		}
+		synchronized (waypoints) {
+			waypoints.clear();
+			waypoints.addAll(path);
+			waypoints.notifyAll();
+		}
 	}
 
-	float maxx, minx, maxy, miny;
+	float maxx, minx, maxy, miny, lx, ly;
 
 	private void loop() {
 		while (true) {
@@ -109,7 +114,19 @@ public class LinesPanel extends DrawingPanel {
 						miny = min(l.y1, min(l.y2, miny));
 					}
 
-					float lx = maxx - minx, ly = maxy - miny;
+					if (pose != null) {
+						maxx = max(pose.getX(), maxx);
+						maxy = max(pose.getY(), maxy);
+						minx = min(pose.getX(), minx);
+						miny = min(pose.getY(), miny);
+					}
+
+					lx = maxx - minx;
+					ly = maxy - miny;
+					if (lx > ly)
+						ly = lx;
+					if (ly > lx)
+						lx = ly;
 
 					paintRect(0, 0, PWIDTH, PHEIGHT, Color.WHITE);
 
@@ -130,6 +147,13 @@ public class LinesPanel extends DrawingPanel {
 						}
 					}
 
+					if (pose != null) {
+						int x = (int) (((pose.getX() - minx) / lx) * PWIDTH);
+						int y = (int) (((pose.getY() - miny) / ly) * PHEIGHT);
+
+						paintRect(x - 5, y - 5, 10, 10, Color.RED);
+					}
+
 					// paintImg(0, 0, getImg("map.png"));
 					update();
 
@@ -145,7 +169,7 @@ public class LinesPanel extends DrawingPanel {
 						e.printStackTrace();
 					}
 
-					//System.out.println("BUO");
+					// System.out.println("BUO");
 					lines.wait();
 				}
 			} catch (InterruptedException e) {

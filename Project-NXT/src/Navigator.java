@@ -16,7 +16,6 @@ import lejos.nxt.comm.BTConnection;
 import lejos.nxt.comm.Bluetooth;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.*;
-
 import static java.lang.Math.*;
 
 public class Navigator {
@@ -25,7 +24,10 @@ public class Navigator {
 			new NXTRegulatedMotor(MotorPort.A), new NXTRegulatedMotor(
 					MotorPort.C));
 	static private OdometryPoseProvider PP = new OdometryPoseProvider(p);
-
+	static private BTConnection con = Bluetooth.waitForConnection();
+	static private DataOutputStream dos;
+	static private DataInputStream dis;
+	
 	public static void main(String[] args) throws InterruptedException {
 		Button.ESCAPE.addButtonListener(new ButtonListener() {
 			public void buttonReleased(Button b) {
@@ -35,10 +37,14 @@ public class Navigator {
 				System.exit(0);
 			}
 		});
+		
+		dos = con.openDataOutputStream();
+		dis = con.openDataInputStream();
 		Upload();
 		/*
 		 * new Thread() { public void run() { while (true) { try {
 		 * Thread.sleep(Sound.playSample(new File("indy.wav"))); } catch
+	
 		 * (InterruptedException e) { } } } }.start();
 		 */
 
@@ -48,9 +54,25 @@ public class Navigator {
 		lejos.robotics.navigation.Navigator n = new lejos.robotics.navigation.Navigator(
 				p, new OdometryPoseProvider(p));
 		// Button.ENTER.waitForPressAndRelease();
+		byte[] b = new byte[24];
 		while (true) {
-			p.rotate(10000);
-			Thread.sleep(10000);
+			try {
+				dis.read(b);
+				Waypoint p = Serialization.DeSerializeWaypoint(b);
+				if(Double.isNaN(p.getX()))
+				{
+					n.stop();
+					n.clearPath();
+				} else {
+					n.addWaypoint(p);
+					n.followPath();
+				}
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 		// Thread.sleep(1000000000);
 	}
@@ -65,8 +87,7 @@ public class Navigator {
 				while (true) {
 					try {
 
-						BTConnection con = Bluetooth.waitForConnection();
-						DataOutputStream dos = con.openDataOutputStream();
+						
 						Sound.beepSequence();
 						Point lastPoint = null;
 						while (true) {
@@ -89,7 +110,7 @@ public class Navigator {
 									&& lastPoint.distanceSq(newPoint) < 100f) {
 								Line l = new Line(lastPoint.x, lastPoint.y,
 										newPoint.x, newPoint.y);
-								dos.write(Serialization.SerializeLine(l));
+								dos.write(Serialization.SerializeLinePose(l, p));
 								dos.flush();
 							}
 							lastPoint = newPoint;

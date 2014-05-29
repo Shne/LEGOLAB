@@ -1,4 +1,5 @@
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -11,49 +12,87 @@ import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommException;
 import lejos.pc.comm.NXTCommFactory;
 import lejos.pc.comm.NXTInfo;
+import lejos.robotics.navigation.Pose;
+import lejos.robotics.navigation.Waypoint;
 
 public class MainFrame extends JFrame {
 
 	public static void main(String[] args) {
-		MainFrame f = new MainFrame();
+		final MainFrame f = new MainFrame();
+		f.NXTConnect();
 		f.run();
 	}
 
-	private void run() {
+	DataInputStream input;
+	DataOutputStream output;
 
+	private void NXTConnect() {
+		NXTComm nxt;
 		try {
-			NXTComm nxt = NXTCommFactory
-					.createNXTComm(NXTCommFactory.BLUETOOTH);
+			nxt = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
+
 			NXTInfo info = new NXTInfo();
 			info.name = "KRISBOT";
 			info.deviceAddress = "00165317366A";
 			nxt.open(info);
-			DataInputStream input = new DataInputStream(nxt.getInputStream());
-			while (true) {
-				byte[] b = new byte[16];
-				input.read(b);
-				Line l = Serialization.DeSerializeLine(b);
-				
-				synchronized (lines) {
-					lines.add(l);
-					lines.notifyAll();
-				//	System.out.println("BUO2");
-				//	System.out.println(l);
-				}
-				
-
-			}
-		} catch (NXTCommException e1) {
+			input = new DataInputStream(nxt.getInputStream());
+			output = new DataOutputStream(nxt.getOutputStream());
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
+		}
+	}
+
+	private void run() {
+		try {
+			while (true) {
+				byte[] b = new byte[28];
+				input.read(b);
+				Pair<Line, Pose> pair = Serialization.DeSerializeLinePose(b);
+
+				synchronized (lines) {
+					lines.add(pair.getFirst());
+					lines.notifyAll();
+					panel.pose = pair.getSecond();
+					// System.out.println("BUO2");
+					// System.out.println(l);
+				}
+			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
 
+	private void runWaypoints() {
+		while (true) {
+			synchronized (waypoints) {
+				try {
+					waypoints.wait();
+					byte[] b0 = Serialization.SerializeWaypoint(new Waypoint(
+							Double.NaN, Double.NaN, Double.NaN));
+					output.write(b0);
+					output.flush();
+					for (Waypoint p : waypoints) {
+						byte[] b = Serialization.SerializeWaypoint(p);
+						output.write(b0);
+						output.flush();
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+
+		}
+	}
+
 	private ArrayList<Line> lines = new ArrayList<Line>();
-	private DrawingPanel panel = new LinesPanel(640, 480, lines);
+	private ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
+	private LinesPanel panel = new LinesPanel(640, 480, lines, waypoints);
 
 	private MainFrame() {
 		this.add(panel);
