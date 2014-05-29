@@ -46,7 +46,7 @@ public class Serialization {
 		DataOutputStream dos = new DataOutputStream(baos);
 		try {
 			dos.writeDouble(p.getX());
-			dos.writeDouble(p.getX());
+			dos.writeDouble(p.getY());
 			dos.writeDouble(p.getHeading());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
