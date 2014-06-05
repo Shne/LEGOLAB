@@ -88,7 +88,11 @@ public class Navigator {
 
 	static Random rand = new Random();
 
-	private static UltrasonicSensor ultron = new UltrasonicSensor(SensorPort.S1);
+	private static UltrasonicSensor[] ultrons = new UltrasonicSensor[] {
+			new UltrasonicSensor(SensorPort.S1),
+			new UltrasonicSensor(SensorPort.S2),
+			new UltrasonicSensor(SensorPort.S3),
+			new UltrasonicSensor(SensorPort.S4) };
 
 	public static void Upload() {
 		new Thread() {
@@ -97,35 +101,41 @@ public class Navigator {
 					try {
 
 						Sound.beepSequence();
-						Point lastPoint = null;
+						Point[] lastPoint = new Point[4];
 						while (true) {
 							Thread.sleep(200);
-							int reading = ultron.getDistance();
-							if (reading == 255) {
-								lastPoint = null;
-								// continue;
-							}
+							for (int i = 0; i < 4; i++) {
+								int reading = ultrons[i].getDistance();
+								if (reading == 255) {
+									lastPoint[i] = null;
+									// continue;
+								}
 
-							Pose p = PP.getPose();
+								Pose p = PP.getPose();
 
-							double Lx = ((double) reading)
-									* cos(toRadians(p.getHeading()));
-							double Ly = ((double) reading)
-									* sin(toRadians(p.getHeading()));
-							Point newPoint = new Point(p.getX() + (float) Lx,
-									p.getY() + (float) Ly);
-							if (lastPoint != null
-									&& lastPoint.distanceSq(newPoint) < 100f) {
-								Line l = new Line(lastPoint.x, lastPoint.y,
-										newPoint.x, newPoint.y);
-								dos.write(Serialization.SerializeLinePose(l, p));
-								dos.flush();
-							} else {
-								Line l = new Line(Float.NaN, Float.NaN, Float.NaN, Float.NaN);
-								dos.write(Serialization.SerializeLinePose(l, p));
-								dos.flush();
+								double Lx = ((double) reading)
+										* cos(toRadians(p.getHeading())+((double)i)*0.5d*PI);
+								double Ly = ((double) reading)
+										* sin(toRadians(p.getHeading())+((double)i)*0.5d*PI);
+								Point newPoint = new Point(p.getX()
+										+ (float) Lx, p.getY() + (float) Ly);
+								if (lastPoint[i] != null
+										&& lastPoint[i].distanceSq(newPoint) < 100f) {
+									Line l = new Line(lastPoint[i].x, lastPoint[i].y,
+											newPoint.x, newPoint.y);
+									dos.write(Serialization.SerializeLinePose(
+											l, p));
+									dos.flush();
+								} else {
+									Line l = new Line(Float.NaN, Float.NaN,
+											Float.NaN, Float.NaN);
+									dos.write(Serialization.SerializeLinePose(
+											l, p));
+									dos.flush();
+								}
+
+								lastPoint[i] = newPoint;
 							}
-							lastPoint = newPoint;
 						}
 
 					} catch (Throwable t) {

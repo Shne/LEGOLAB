@@ -49,7 +49,7 @@ public class DrawingPanel extends JPanel {
 		gfx = (Graphics2D) bufferImg.createGraphics();
 		AffineTransform tx = AffineTransform.getScaleInstance(1d, -1d);
 		tx.translate(0, -PHEIGHT);
-		gfx.setTransform(tx);
+		//gfx.setTransform(tx);
 		clear();
 	}
 	

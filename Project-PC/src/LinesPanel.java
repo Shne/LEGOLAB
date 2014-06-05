@@ -56,7 +56,7 @@ public class LinesPanel extends DrawingPanel {
 
 	protected void pathGen(int x, int y) {
 		float fx = minx + (lx) * ((float) x) / ((float) PWIDTH);
-		float fy = miny + (ly) * ((float) y) / ((float) (PHEIGHT-y));
+		float fy = miny + (ly) * ((float) y) / ((float) (PHEIGHT));
 
 		System.out.println(fx);
 		System.out.println(fy);
