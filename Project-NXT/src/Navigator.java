@@ -37,7 +37,10 @@ public class Navigator {
 				System.exit(0);
 			}
 		});
-
+		
+		LCD.drawString("INDIANA JONES", 0, 0);
+		LCD.drawString("IS BEST JONES", 0, 1);
+		
 		dos = con.openDataOutputStream();
 		dis = con.openDataInputStream();
 		Upload();
