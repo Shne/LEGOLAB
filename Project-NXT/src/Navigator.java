@@ -37,10 +37,10 @@ public class Navigator {
 				System.exit(0);
 			}
 		});
-		
+
 		LCD.drawString("INDIANA JONES", 0, 0);
 		LCD.drawString("IS BEST JONES", 0, 1);
-		
+
 		dos = con.openDataOutputStream();
 		dis = con.openDataInputStream();
 		Upload();
@@ -75,9 +75,10 @@ public class Navigator {
 					n.clearPath();
 					p.stop();
 					Sound.beepSequenceUp();
+				} else if (Double.isInfinite(point.getX())) {
+					n.followPath();
 				} else {
 					n.addWaypoint(point);
-					n.followPath();
 				}
 
 			} catch (IOException e) {
@@ -117,15 +118,18 @@ public class Navigator {
 								Pose p = PP.getPose();
 
 								double Lx = ((double) reading)
-										* cos(toRadians(p.getHeading())+((double)i)*0.5d*PI);
+										* cos(toRadians(p.getHeading())
+												+ ((double) i) * 0.5d * PI);
 								double Ly = ((double) reading)
-										* sin(toRadians(p.getHeading())+((double)i)*0.5d*PI);
+										* sin(toRadians(p.getHeading())
+												+ ((double) i) * 0.5d * PI);
 								Point newPoint = new Point(p.getX()
 										+ (float) Lx, p.getY() + (float) Ly);
 								if (lastPoint[i] != null
 										&& lastPoint[i].distanceSq(newPoint) < 100f) {
-									Line l = new Line(lastPoint[i].x, lastPoint[i].y,
-											newPoint.x, newPoint.y);
+									Line l = new Line(lastPoint[i].x,
+											lastPoint[i].y, newPoint.x,
+											newPoint.y);
 									dos.write(Serialization.SerializeLinePose(
 											l, p));
 									dos.flush();

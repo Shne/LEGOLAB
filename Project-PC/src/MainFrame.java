@@ -87,6 +87,10 @@ public class MainFrame extends JFrame {
 						output.write(b);
 						output.flush();
 					}
+					b0 = Serialization.SerializeWaypoint(new Waypoint(
+							Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
+					output.write(b0);
+					output.flush();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
