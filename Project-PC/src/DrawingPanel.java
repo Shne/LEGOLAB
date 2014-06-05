@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Polygon;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +47,9 @@ public class DrawingPanel extends JPanel {
 		bufferImg = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleVolatileImage(PWIDTH, PHEIGHT, VolatileImage.OPAQUE);
 		//bufferImg = new BufferedImage(PWIDTH, PHEIGHT, BufferedImage.TYPE_INT_ARGB);
 		gfx = (Graphics2D) bufferImg.createGraphics();
+		AffineTransform tx = AffineTransform.getScaleInstance(1d, -1d);
+		tx.translate(0, -PHEIGHT);
+		gfx.setTransform(tx);
 		clear();
 	}
 	
