@@ -95,11 +95,7 @@ public class LinesPanel extends DrawingPanel {
 				maxy + 1f));
 
 		ShortestPathFinder pather = new ShortestPathFinder(lm);
-<<<<<<< HEAD
 //		pather.lengthenLines(20f);
-=======
-		pather.lengthenLines(11f);
->>>>>>> fa81b95cdaf1e6373ff70e262de4e828dda9b124
 		Path path = null;
 		try {
 			path = pather.findRoute(pose, new Waypoint(fx, fy));
