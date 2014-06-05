@@ -42,18 +42,18 @@ public class Navigator {
 		dis = con.openDataInputStream();
 		Upload();
 
-		new Thread() {
-			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(Sound.playSample(new File("indy.wav")));
-					} catch
-
-					(InterruptedException e) {
-					}
-				}
-			}
-		}.start();
+//		new Thread() {
+//			public void run() {
+//				while (true) {
+//					try {
+//						Thread.sleep(Sound.playSample(new File("indy.wav")));
+//					} catch
+//
+//					(InterruptedException e) {
+//					}
+//				}
+//			}
+//		}.start();
 
 		p.setTravelSpeed(20.0);
 		p.setRotateSpeed(10.0);

@@ -47,9 +47,9 @@ public class DrawingPanel extends JPanel {
 		bufferImg = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleVolatileImage(PWIDTH, PHEIGHT, VolatileImage.OPAQUE);
 		//bufferImg = new BufferedImage(PWIDTH, PHEIGHT, BufferedImage.TYPE_INT_ARGB);
 		gfx = (Graphics2D) bufferImg.createGraphics();
-		AffineTransform tx = AffineTransform.getScaleInstance(1d, -1d);
-		tx.translate(0, -PHEIGHT);
-		//gfx.setTransform(tx);
+//		AffineTransform tx = AffineTransform.getScaleInstance(1d, -1d);
+//		tx.translate(0, -PHEIGHT);
+//		gfx.setTransform(tx);
 		clear();
 	}
 	
