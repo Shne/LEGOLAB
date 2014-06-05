@@ -58,11 +58,31 @@ public class Navigator {
 //			}
 //		}.start();
 
-		p.setTravelSpeed(20.0);
-		p.setRotateSpeed(10.0);
+		p.setTravelSpeed(30.0);
+		p.setRotateSpeed(20.0);
 		p.setAcceleration(50);
 		lejos.robotics.navigation.Navigator n = new lejos.robotics.navigation.Navigator(
 				p, new OdometryPoseProvider(p));
+		n.addNavigationListener(new NavigationListener() {
+			@Override
+			public void pathComplete(Waypoint waypoint, Pose pose, int sequence) {
+				try {
+					synchronized(dos) {
+						dos.write(Serialization.SerializeLinePose(new Line(Float.POSITIVE_INFINITY, 0f, 0f, 0f), new Pose(0f,0f,0f)));
+						dos.flush();
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				p.setRotateSpeed(20.0);
+				p.rotate(100000., true);
+			}
+			@Override
+			public void atWaypoint(Waypoint waypoint, Pose pose, int sequence) {}
+			@Override
+			public void pathInterrupted(Waypoint waypoint, Pose pose, int sequence) {}
+		});
 		p.rotate(1000000., true);
 		// Button.ENTER.waitForPressAndRelease();
 		byte[] b = new byte[24];
@@ -76,20 +96,16 @@ public class Navigator {
 					p.stop();
 					Sound.beepSequenceUp();
 				} else if (Double.isInfinite(point.getX())) {
-					n.followPath();
-					p.setTravelSpeed(40.0);
 					p.setRotateSpeed(40.0);
+					n.followPath();
 				} else {
 					n.addWaypoint(point.x, point.y);
 				}
-
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		}
-		// Thread.sleep(1000000000);
 	}
 
 	static Random rand = new Random();
@@ -127,20 +143,22 @@ public class Navigator {
 												+ ((double) i) * 0.5d * PI);
 								Point newPoint = new Point(p.getX()
 										+ (float) Lx, p.getY() + (float) Ly);
-								if (lastPoint[i] != null
-										&& lastPoint[i].distanceSq(newPoint) < 100f) {
-									Line l = new Line(lastPoint[i].x,
-											lastPoint[i].y, newPoint.x,
-											newPoint.y);
-									dos.write(Serialization.SerializeLinePose(
-											l, p));
-									dos.flush();
-								} else {
-									Line l = new Line(Float.NaN, Float.NaN,
-											Float.NaN, Float.NaN);
-									dos.write(Serialization.SerializeLinePose(
-											l, p));
-									dos.flush();
+								synchronized (dos) {
+									if (lastPoint[i] != null
+											&& lastPoint[i].distanceSq(newPoint) < 100f) {
+										Line l = new Line(lastPoint[i].x,
+												lastPoint[i].y, newPoint.x,
+												newPoint.y);
+										dos.write(Serialization.SerializeLinePose(
+												l, p));
+										dos.flush();
+									} else {
+										Line l = new Line(Float.NaN, Float.NaN,
+												Float.NaN, Float.NaN);
+										dos.write(Serialization.SerializeLinePose(
+												l, p));
+										dos.flush();
+									}
 								}
 
 								lastPoint[i] = newPoint;

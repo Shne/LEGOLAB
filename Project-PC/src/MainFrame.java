@@ -57,12 +57,15 @@ public class MainFrame extends JFrame {
 				Pair<Line, Pose> pair = Serialization.DeSerializeLinePose(b);
 
 				jerk:synchronized (lines) {
-					panel.pose = pair.getSecond();
-					if(!Double.isNaN(pair.getFirst().getX1()))
-					{
-						lines.add(pair.getFirst());
+					if(Double.isInfinite(pair.getFirst().getX1())) {
+						panel.rePath();
+					} else {
+						if(!Double.isNaN(pair.getFirst().getX1())) {
+							lines.add(pair.getFirst());
+						}
+						panel.pose = pair.getSecond();
 					}
-					lines.notifyAll();				
+					lines.notifyAll();			
 					// System.out.println("BUO2");
 					// System.out.println(l);
 				}

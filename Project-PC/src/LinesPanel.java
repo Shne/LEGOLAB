@@ -36,6 +36,7 @@ public class LinesPanel extends DrawingPanel {
 	private ArrayList<Line> lines2 = new ArrayList<Line>();
 	private ArrayList<Line> pathses = new ArrayList<Line>();
 	private ArrayList<Waypoint> waypoints;
+	private float lastx, lasty;
 	public volatile Pose pose;
 
 	public LinesPanel(int width, int height) {
@@ -69,28 +70,45 @@ public class LinesPanel extends DrawingPanel {
 	protected void pathGen(int x, int y) {
 		float fx = minx + (lx) * ((float) x) / ((float) PWIDTH);
 		float fy = miny + (ly) * ((float) y) / ((float) PHEIGHT);
-
+		lastx = fx;
+		lasty = fy;
+		PathTo(fx, fy);
+	}
+	
+	protected void rePath() {
+		new Thread() {
+			public void run() {
+				try {
+					Thread.sleep(5000);
+					PathTo(lastx, lasty);
+				} catch(InterruptedException e) {}
+			}
+		}.start();
+	}
+	private void PathTo(float fx, float fy) {
 		System.out.println(fx);
 		System.out.println(fy);
 		lines2.clear();
 		for (Line l : lines) {
 			// l.x1, l.y1, l.x2, l.y2 is the original line
 //			lines2.add(new Line(l.x1, l.y1, l.x2, l.y2)); //adding only the original line
-			float d = 30;
+			float d = 18;
 			Point a = new Point(l.x1, l.y1);
 			Point b = new Point(l.x2, l.y2);
 			Point v = b.subtract(a);
 			Point o1 = v.multiply(d).multiply(1/v.length());
-			Point o2 = new Point(o1.y, - o1.x).multiply(0.33f);
+			Point o2 = new Point(o1.y, - o1.x).multiply(0.4f);
 			
 			Point p1 = b.add(o1).add(o2);
 			Point p2 = b.add(o1).subtract(o2);
 			Point p3 = a.subtract(o1).subtract(o2);
 			Point p4 = a.subtract(o1).add(o2);
-			lines2.add(new Line(p1.x, p1.y, p2.x, p2.y));
-			lines2.add(new Line(p2.x, p2.y, p3.x, p3.y));
-			lines2.add(new Line(p3.x, p3.y, p4.x, p4.y));
-			lines2.add(new Line(p4.x, p4.y, p1.x, p1.y));
+			synchronized(lines2) {
+				lines2.add(new Line(p1.x, p1.y, p2.x, p2.y));
+				lines2.add(new Line(p2.x, p2.y, p3.x, p3.y));
+				lines2.add(new Line(p3.x, p3.y, p4.x, p4.y));
+				lines2.add(new Line(p4.x, p4.y, p1.x, p1.y));
+			}
 		}
 		LineMap lm = new LineMap(((Line[]) lines2.toArray(new Line[lines2
 				.size()])), new Rectangle(minx - 1f, miny - 1f, maxx + 1f,
@@ -117,7 +135,7 @@ public class LinesPanel extends DrawingPanel {
 		}
 		synchronized (waypoints) {
 			waypoints.clear();
-			waypoints.addAll(path);
+			waypoints.add(path.get(1));
 			waypoints.notifyAll();
 		}
 	}
@@ -170,12 +188,14 @@ public class LinesPanel extends DrawingPanel {
 						int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
 						paintLine(x1, y1, x2, y2, Color.BLACK);
 					}
-					for (Line l : lines2) {
-						int x1 = (int) (((l.x1 - minx) / lx) * PWIDTH);
-						int y1 = (int) (((l.y1 - miny) / ly) * PHEIGHT);
-						int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
-						int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
-						paintLine(x1, y1, x2, y2, Color.CYAN);
+					synchronized(lines2) {
+						for (Line l : lines2) {
+							int x1 = (int) (((l.x1 - minx) / lx) * PWIDTH);
+							int y1 = (int) (((l.y1 - miny) / ly) * PHEIGHT);
+							int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
+							int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
+							paintLine(x1, y1, x2, y2, Color.CYAN);
+						}
 					}
 					synchronized (pathses) {
 						for (Line l : pathses) {
@@ -188,12 +208,14 @@ public class LinesPanel extends DrawingPanel {
 						if(pathses.size()!=0)
 						{
 							Line grailPos = pathses.get(pathses.size()-1);
-							paintImg((int)grailPos.x2-8, (int)grailPos.y2-8, Grail, 0d);
+							int x = (int) (((grailPos.x2 - minx) / lx) * PWIDTH)-8;
+							int y = (int) (((grailPos.y2 - miny) / ly) * PHEIGHT)-8;
+							paintImg(x, y, Grail, 0d);
 						}
 					}
 
 					if (pose != null) {
-						System.out.println(pose.getX() + ", " +  pose.getY());
+//						System.out.println(pose.getX() + ", " +  pose.getY());
 						int x = (int) (((pose.getX() - minx) / lx) * PWIDTH);
 						int y = (int) (((pose.getY() - miny) / ly) * PHEIGHT);
 
