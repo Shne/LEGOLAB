@@ -77,8 +77,10 @@ public class Navigator {
 					Sound.beepSequenceUp();
 				} else if (Double.isInfinite(point.getX())) {
 					n.followPath();
+					p.setTravelSpeed(40.0);
+					p.setRotateSpeed(40.0);
 				} else {
-					n.addWaypoint(point);
+					n.addWaypoint(point.x, point.y);
 				}
 
 			} catch (IOException e) {

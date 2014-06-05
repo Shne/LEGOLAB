@@ -9,7 +9,10 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import org.jfree.data.xy.Vector;
+
 import lejos.geom.Line;
+import lejos.geom.Point;
 import lejos.geom.Rectangle;
 import lejos.robotics.mapping.LineMap;
 import lejos.robotics.navigation.DestinationUnreachableException;
@@ -24,6 +27,7 @@ public class LinesPanel extends DrawingPanel {
 
 	private static final long serialVersionUID = 2439767843L;
 	private ArrayList<Line> lines;
+	private ArrayList<Line> lines2 = new ArrayList<Line>();
 	private ArrayList<Line> pathses = new ArrayList<Line>();
 	private ArrayList<Waypoint> waypoints;
 	public volatile Pose pose;
@@ -60,16 +64,32 @@ public class LinesPanel extends DrawingPanel {
 
 		System.out.println(fx);
 		System.out.println(fy);
-		ArrayList<Line> lines2 = new ArrayList<Line>();
+		lines2.clear();
 		for (Line l : lines) {
-			lines2.add(new Line(l.x1, l.y1, l.x2, l.y2));
+			// l.x1, l.y1, l.x2, l.y2 is the original line
+//			lines2.add(new Line(l.x1, l.y1, l.x2, l.y2)); //adding only the original line
+			float d = 30;
+			Point a = new Point(l.x1, l.y1);
+			Point b = new Point(l.x2, l.y2);
+			Point v = b.subtract(a);
+			Point o1 = v.multiply(d).multiply(1/v.length());
+			Point o2 = new Point(o1.y, - o1.x).multiply(0.33f);
+			
+			Point p1 = b.add(o1).add(o2);
+			Point p2 = b.add(o1).subtract(o2);
+			Point p3 = a.subtract(o1).subtract(o2);
+			Point p4 = a.subtract(o1).add(o2);
+			lines2.add(new Line(p1.x, p1.y, p2.x, p2.y));
+			lines2.add(new Line(p2.x, p2.y, p3.x, p3.y));
+			lines2.add(new Line(p3.x, p3.y, p4.x, p4.y));
+			lines2.add(new Line(p4.x, p4.y, p1.x, p1.y));
 		}
 		LineMap lm = new LineMap(((Line[]) lines2.toArray(new Line[lines2
 				.size()])), new Rectangle(minx - 1f, miny - 1f, maxx + 1f,
 				maxy + 1f));
 
 		ShortestPathFinder pather = new ShortestPathFinder(lm);
-		pather.lengthenLines(20f);
+//		pather.lengthenLines(20f);
 		Path path = null;
 		try {
 			path = pather.findRoute(pose, new Waypoint(fx, fy));
@@ -141,6 +161,13 @@ public class LinesPanel extends DrawingPanel {
 						int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
 						int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
 						paintLine(x1, y1, x2, y2, Color.BLACK);
+					}
+					for (Line l : lines2) {
+						int x1 = (int) (((l.x1 - minx) / lx) * PWIDTH);
+						int y1 = (int) (((l.y1 - miny) / ly) * PHEIGHT);
+						int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
+						int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
+						paintLine(x1, y1, x2, y2, Color.CYAN);
 					}
 					synchronized (pathses) {
 						for (Line l : pathses) {
