@@ -95,10 +95,17 @@ public class DrawingPanel extends JPanel {
 		gfx.fillPolygon(new Polygon(new int[] {x1,x2,x3,x4}, new int[] {y1,y2,y3,y4}, 4));
 	}
 	
-	protected void paintImg(int x, int y, Image I)
+	protected void paintImg(int x, int y, Image I, double rotation)
 	{
 		gfx.setComposite(AlphaComposite.SrcOver);
-		gfx.drawImage(I, x, y, this);
+		int w = I.getWidth(this); int h = I.getHeight(this);
+		BufferedImage bimg = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+		bimg.getGraphics().drawImage(I,0,0,this);
+		AffineTransform tx = new AffineTransform();
+		tx.translate(w/2, h/2);
+		tx.rotate(rotation);
+		tx.translate(-w/2, -h/2);
+		gfx.drawImage(bimg, new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC), x, y);
 	}
 	
 	protected VolatileImage getImg(String s)

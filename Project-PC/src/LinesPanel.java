@@ -2,7 +2,10 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,6 +24,8 @@ import lejos.robotics.pathfinding.ShortestPathFinder;
 import static java.lang.Math.*;
 
 public class LinesPanel extends DrawingPanel {
+	
+	private VolatileImage Indy;
 
 	private static final long serialVersionUID = 2439767843L;
 	private ArrayList<Line> lines;
@@ -36,6 +41,7 @@ public class LinesPanel extends DrawingPanel {
 
 	public LinesPanel(int width, int height, ArrayList<Line> lines, ArrayList<Waypoint> waypoints) {
 		super(width, height);
+		Indy = getImg("indy.png");
 		this.lines = lines;
 		this.waypoints = waypoints;
 		new Thread() {
@@ -56,7 +62,7 @@ public class LinesPanel extends DrawingPanel {
 
 	protected void pathGen(int x, int y) {
 		float fx = minx + (lx) * ((float) x) / ((float) PWIDTH);
-		float fy = miny + (ly) * ((float) y) / ((float) (PHEIGHT));
+		float fy = miny + (ly) * ((float) y) / ((float) PHEIGHT);
 
 		System.out.println(fx);
 		System.out.println(fy);
@@ -69,7 +75,7 @@ public class LinesPanel extends DrawingPanel {
 				maxy + 1f));
 
 		ShortestPathFinder pather = new ShortestPathFinder(lm);
-		pather.lengthenLines(20f);
+		pather.lengthenLines(11f);
 		Path path = null;
 		try {
 			path = pather.findRoute(pose, new Waypoint(fx, fy));
@@ -153,27 +159,17 @@ public class LinesPanel extends DrawingPanel {
 					}
 
 					if (pose != null) {
-//						System.out.println(pose.getX() + ", " +  pose.getY());
+						System.out.println(pose.getX() + ", " +  pose.getY());
 						int x = (int) (((pose.getX() - minx) / lx) * PWIDTH);
 						int y = (int) (((pose.getY() - miny) / ly) * PHEIGHT);
 
 						paintRect(x - 5, y - 5, 10, 10, Color.RED);
+						
+						paintImg(x-32, y-32, Indy, toRadians(pose.getHeading()));
 					}
 
 					// paintImg(0, 0, getImg("map.png"));
 					update();
-
-					BufferedImage outimg = new BufferedImage(WIDTH, HEIGHT,
-							BufferedImage.TYPE_INT_RGB);
-
-					this.paintComponent(outimg.getGraphics());
-
-					try {
-						ImageIO.write(outimg, "png", new File("map.png"));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 
 					// System.out.println("BUO");
 					lines.wait();
