@@ -101,7 +101,7 @@ public class MainFrame extends JFrame {
 
 	private ArrayList<Line> lines = new ArrayList<Line>();
 	private ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
-	private LinesPanel panel = new LinesPanel(640, 480, lines, waypoints);
+	private LinesPanel panel = new LinesPanel(800, 800, lines, waypoints);
 
 	private MainFrame() {
 		this.add(panel);
