@@ -29,6 +29,7 @@ import static java.lang.Math.*;
 public class LinesPanel extends DrawingPanel {
 	
 	private VolatileImage Indy;
+	private VolatileImage Grail;
 
 	private static final long serialVersionUID = 2439767843L;
 	private ArrayList<Line> lines;
@@ -46,6 +47,7 @@ public class LinesPanel extends DrawingPanel {
 	public LinesPanel(int width, int height, ArrayList<Line> lines, ArrayList<Waypoint> waypoints) {
 		super(width, height);
 		Indy = getImg("indy.png");
+		Grail = getImg("grail.png");
 		this.lines = lines;
 		this.waypoints = waypoints;
 		new Thread() {
@@ -182,6 +184,11 @@ public class LinesPanel extends DrawingPanel {
 							int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
 							int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
 							paintLine(x1, y1, x2, y2, Color.BLUE);
+						}
+						if(pathses.size()!=0)
+						{
+							Line grailPos = pathses.get(pathses.size()-1);
+							paintImg((int)grailPos.x2-8, (int)grailPos.y2-8, Grail, 0d);
 						}
 					}
 
