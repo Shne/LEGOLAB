@@ -226,6 +226,7 @@ public class LinesPanel extends DrawingPanel {
 					maxdist = l2o.getP2().distance(l2o.getP1());
 				}
 				news.add(new Line(p1.x, p1.y, p2.x, p2.y));
+				break;
 			}
 		}
 		lines.removeAll(prunes);
