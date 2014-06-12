@@ -63,7 +63,15 @@ public class LinesPanel extends DrawingPanel {
 		}.start();
 		this.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent e) {
-				pathGen(e.getPoint().x, e.getPoint().y);
+				if(e.isShiftDown())
+				{
+					forcePath(e.getPoint().x, e.getPoint().y);
+				}
+				else
+				{
+					pathGen(e.getPoint().x, e.getPoint().y);
+				}
+				
 			}
 		});
 	}
@@ -74,6 +82,22 @@ public class LinesPanel extends DrawingPanel {
 		lastx = fx;
 		lasty = fy;
 		PathTo(fx, fy);
+	}
+	
+	protected void forcePath(int x, int y) {
+		float fx = minx + (lx) * ((float) x) / ((float) PWIDTH);
+		float fy = miny + (ly) * ((float) y) / ((float) PHEIGHT);
+		lastx = fx;
+		lasty = fy;
+		synchronized (pathses) {
+			pathses.clear();
+			pathses.add(new Line(pose.getX(), pose.getY(), fx, fy));
+		}
+		synchronized (waypoints) {
+			waypoints.clear();
+			waypoints.add(new Waypoint(fx, fy));
+			waypoints.notifyAll();
+		}
 	}
 
 	protected void rePath() {
