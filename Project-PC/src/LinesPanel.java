@@ -63,15 +63,12 @@ public class LinesPanel extends DrawingPanel {
 		}.start();
 		this.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent e) {
-				if(e.isShiftDown())
-				{
+				if (e.isShiftDown()) {
 					forcePath(e.getPoint().x, e.getPoint().y);
-				}
-				else
-				{
+				} else {
 					pathGen(e.getPoint().x, e.getPoint().y);
 				}
-				
+
 			}
 		});
 	}
@@ -83,7 +80,7 @@ public class LinesPanel extends DrawingPanel {
 		lasty = fy;
 		PathTo(fx, fy);
 	}
-	
+
 	protected void forcePath(int x, int y) {
 		float fx = minx + (lx) * ((float) x) / ((float) PWIDTH);
 		float fy = miny + (ly) * ((float) y) / ((float) PHEIGHT);
@@ -105,7 +102,8 @@ public class LinesPanel extends DrawingPanel {
 			public void run() {
 				try {
 					Thread.sleep(5000);
-					PathTo(lastx, lasty);
+					if (pose.distanceTo(new Point(lastx, lasty)) > 1f)
+						PathTo(lastx, lasty);
 				} catch (InterruptedException e) {
 				}
 			}
@@ -300,7 +298,7 @@ public class LinesPanel extends DrawingPanel {
 							int y1 = (int) (((l.y1 - miny) / ly) * PHEIGHT);
 							int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
 							int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
-							paintLine(x1, y1, x2, y2, Color.CYAN);
+							//paintLine(x1, y1, x2, y2, Color.CYAN);
 						}
 					}
 
