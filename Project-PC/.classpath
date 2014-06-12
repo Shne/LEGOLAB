@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/javaml-0.1.7.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/libsvm.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/weka.jar"/>
+	<classpathentry kind="lib" path="CompGeom-0.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

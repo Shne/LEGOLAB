@@ -1,20 +1,13 @@
+import static java.lang.Math.*;
+
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Random;
-
-import javax.imageio.ImageIO;
-
-import org.jfree.data.xy.Vector;
+import java.util.Set;
 
 import lejos.geom.Line;
 import lejos.geom.Point;
@@ -24,27 +17,19 @@ import lejos.robotics.navigation.DestinationUnreachableException;
 import lejos.robotics.navigation.Pose;
 import lejos.robotics.navigation.Waypoint;
 import lejos.robotics.pathfinding.Path;
-import lejos.robotics.pathfinding.PathFinder;
 import lejos.robotics.pathfinding.ShortestPathFinder;
-import static java.lang.Math.*;
-
-import com.tomgibara.cluster.gvm.*;
-import com.tomgibara.cluster.gvm.dbl.DblClusters;
-import com.tomgibara.cluster.gvm.flt.FltClusters;
-import com.tomgibara.cluster.gvm.flt.FltResult;
-
-import net.sf.javaml.clustering.*;
-import net.sf.javaml.clustering.mcl.MCL;
-import net.sf.javaml.core.*;
-import net.sf.javaml.distance.EuclideanDistance;
-import net.sf.javaml.distance.NormalizedEuclideanDistance;
-import net.sf.javaml.distance.NormalizedEuclideanSimilarity;
-import net.sf.javaml.distance.RBFKernel;
+import compgeom.*;
+import compgeom.algorithms.BentleyOttmann;
 
 public class LinesPanel extends DrawingPanel {
 
 	private VolatileImage Indy;
 	private VolatileImage Grail;
+
+	// Nice parameters, plz do magic
+	private final static float PATHFINDING_D = 18f;
+	private final static double PRUNING_FAC = 4d;
+	private final static double PRUNING_WAIT = 25;
 
 	private static final long serialVersionUID = 2439767843L;
 	private ArrayList<Line> lines;
@@ -53,8 +38,6 @@ public class LinesPanel extends DrawingPanel {
 	private ArrayList<Waypoint> waypoints;
 	private float lastx, lasty;
 	public volatile Pose pose;
-
-	Dataset dataz = new DefaultDataset();
 
 	public LinesPanel(int width, int height) {
 		super(width, height);
@@ -113,7 +96,7 @@ public class LinesPanel extends DrawingPanel {
 			// l.x1, l.y1, l.x2, l.y2 is the original line
 			// lines2.add(new Line(l.x1, l.y1, l.x2, l.y2)); //adding only the
 			// original line
-			float d = 18;
+			float d = PATHFINDING_D;
 			Point a = new Point(l.x1, l.y1);
 			Point b = new Point(l.x2, l.y2);
 			Point v = b.subtract(a);
@@ -161,11 +144,79 @@ public class LinesPanel extends DrawingPanel {
 		}
 	}
 
+	private void pruneLines(ArrayList<Line> lines) {
+		HashSet<Line> prunes = new HashSet<Line>();
+		HashSet<Line> news = new HashSet<Line>();
+		// TODO: Real line segment intersection
+		for (int i = 0; i < lines.size(); ++i) {
+			Line l1o = lines.get(i);
+			if (prunes.contains(l1o))
+				continue;
+			for (int j = i + 1; j < lines.size(); ++j) {
+				Line l2o = lines.get(j);
+				if (prunes.contains(l2o))
+					continue;
+				Line l1 = (Line) l1o.clone();
+				Line l2 = (Line) l2o.clone();
+				l1.lengthen(1f);
+				l2.lengthen(1f);
+				Point intersect = l1.intersectsAt(l2);
+				if (intersect == null)
+					continue;
+				double m1 = (l1.y1 - l1.y2) / (l1.x1 - l1.x2);
+				double m2 = (l2.y1 - l2.y2) / (l2.x1 - l2.x2);
+
+				double angle = atan((m1 - m2) / (1d - m1 * m2));
+				if (abs(angle) > PI / PRUNING_FAC)
+					continue;
+				prunes.add(l1o);
+				prunes.add(l2o);
+				double maxdist = Double.MIN_VALUE;
+				Point p1 = null, p2 = null;
+				if (l1o.getP1().distance(l2o.getP1()) > maxdist) {
+					p1 = l1o.getP1();
+					p2 = l2o.getP1();
+					maxdist = l1o.getP1().distance(l2o.getP1());
+				}
+				if (l1o.getP2().distance(l2o.getP1()) > maxdist) {
+					p1 = l1o.getP2();
+					p2 = l2o.getP1();
+					maxdist = l1o.getP2().distance(l2o.getP1());
+				}
+				if (l1o.getP1().distance(l2o.getP2()) > maxdist) {
+					p1 = l1o.getP1();
+					p2 = l2o.getP2();
+					maxdist = l1o.getP1().distance(l2o.getP2());
+				}
+				if (l1o.getP2().distance(l2o.getP2()) > maxdist) {
+					p1 = l1o.getP2();
+					p2 = l2o.getP2();
+					maxdist = l1o.getP2().distance(l2o.getP2());
+				}
+				if (l1o.getP2().distance(l1o.getP1()) > maxdist) {
+					p1 = l1o.getP2();
+					p2 = l1o.getP1();
+					maxdist = l1o.getP2().distance(l1o.getP1());
+				}
+				if (l2o.getP2().distance(l2o.getP1()) > maxdist) {
+					p1 = l2o.getP2();
+					p2 = l2o.getP1();
+					maxdist = l2o.getP2().distance(l2o.getP1());
+				}
+				news.add(new Line(p1.x, p1.y, p2.x, p2.y));
+			}
+		}
+		lines.removeAll(prunes);
+		lines.addAll(news);
+	}
+
 	float maxx, minx, maxy, miny, lx, ly;
 
 	Random r = new Random();
 
 	public Color lastColor;
+
+	int counter = 0;
 
 	private void loop() {
 		while (true) {
@@ -173,11 +224,11 @@ public class LinesPanel extends DrawingPanel {
 				synchronized (lines) {
 					if (lines.size() == 0)
 						continue;
+					if (++counter % PRUNING_WAIT == 0)
+						pruneLines(lines);
+
 					Line newLine = lines.get(lines.size() - 1);
-					dataz.add(new DenseInstance(new double[] { newLine.x1,
-							newLine.y1, }));
-					dataz.add(new DenseInstance(new double[] { newLine.x2,
-							newLine.y2, }));
+
 					maxx = Float.MIN_VALUE;
 					maxy = Float.MIN_VALUE;
 					minx = Float.MAX_VALUE;
@@ -219,32 +270,6 @@ public class LinesPanel extends DrawingPanel {
 						paintLine(x1, y1, x2, y2, Color.BLACK);
 					}
 
-					if (lines.size() > 10) {
-						//for (Dataset data : new MCL(new RBFKernel()).cluster(dataz)) {
-						for(Dataset data : new DensityBasedSpatialClustering().cluster(dataz)){
-							Color c = new Color(r.nextInt());
-							ArrayList<NumberedPoint> plist = new ArrayList<NumberedPoint>();
-							int i=0;
-							for (Instance point : data) {
-								plist.add(new NumberedPoint(point.value(0), point.value(1), ++i));
-							}
-							if(plist.size()<2)
-							{
-								continue;
-							}
-							List<NumberedPoint> reslist = INC_CH.convexHull_INC_CH(plist);
-							NumberedPoint last = reslist.get(reslist.size()-1);
-							for(NumberedPoint p : reslist)
-							{
-								int x1 = (int) (((last.x - minx) / lx) * PWIDTH);
-								int y1 = (int) (((last.y - miny) / ly) * PHEIGHT);
-								int x2 = (int) (((p.x - minx) / lx) * PWIDTH);
-								int y2 = (int) (((p.y - miny) / ly) * PHEIGHT);
-								paintLine(x1, y1, x2, y2, Color.RED);
-								last = p;
-							}
-						}
-					}
 					synchronized (lines2) {
 						for (Line l : lines2) {
 							int x1 = (int) (((l.x1 - minx) / lx) * PWIDTH);
@@ -254,6 +279,7 @@ public class LinesPanel extends DrawingPanel {
 							paintLine(x1, y1, x2, y2, Color.CYAN);
 						}
 					}
+
 					synchronized (pathses) {
 						for (Line l : pathses) {
 							int x1 = (int) (((l.x1 - minx) / lx) * PWIDTH);
