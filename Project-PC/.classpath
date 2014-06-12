@@ -4,5 +4,12 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.lejos.nxt.ldt.LEJOS_LIBRARY_CONTAINER/pc"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Project-Lib"/>
+	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/cluster-gvm-1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/ajt-2.9.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/commons-math-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/Jama-1.0.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/javaml-0.1.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/libsvm.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kris/Documents/GitHub/LEGOLAB/Project-PC/weka.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
