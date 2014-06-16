@@ -3,11 +3,13 @@ import static java.lang.Math.*;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Path2D;
 import java.awt.image.VolatileImage;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.awt.*;
 
 import lejos.geom.Line;
 import lejos.geom.Point;
@@ -18,8 +20,6 @@ import lejos.robotics.navigation.Pose;
 import lejos.robotics.navigation.Waypoint;
 import lejos.robotics.pathfinding.Path;
 import lejos.robotics.pathfinding.ShortestPathFinder;
-import compgeom.*;
-import compgeom.algorithms.BentleyOttmann;
 
 public class LinesPanel extends DrawingPanel {
 
@@ -129,6 +129,18 @@ public class LinesPanel extends DrawingPanel {
 			Point p2 = b.add(o1).subtract(o2);
 			Point p3 = a.subtract(o1).subtract(o2);
 			Point p4 = a.subtract(o1).add(o2);
+			
+			Path2D.Double p = new Path2D.Double();
+			
+			p.moveTo(p1.x, p1.y);
+			p.lineTo(p2.x, p2.y);
+			p.lineTo(p3.x, p3.y);
+			p.lineTo(p4.x, p4.y);
+			p.lineTo(p1.x, p1.y);
+			
+			if(p.contains(pose.getX(), pose.getY()) || p.contains(fx, fy))
+				continue;
+			
 			synchronized (lines2) {
 				lines2.add(new Line(p1.x, p1.y, p2.x, p2.y));
 				lines2.add(new Line(p2.x, p2.y, p3.x, p3.y));
@@ -161,7 +173,7 @@ public class LinesPanel extends DrawingPanel {
 		}
 		synchronized (waypoints) {
 			waypoints.clear();
-			waypoints.add(path.get(1));
+			waypoints.addAll(path);
 			waypoints.notifyAll();
 		}
 	}
@@ -299,7 +311,7 @@ public class LinesPanel extends DrawingPanel {
 							int y1 = (int) (((l.y1 - miny) / ly) * PHEIGHT);
 							int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
 							int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
-							//paintLine(x1, y1, x2, y2, Color.CYAN);
+							paintLine(x1, y1, x2, y2, Color.CYAN);
 						}
 					}
 
