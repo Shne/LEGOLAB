@@ -58,7 +58,7 @@ public class MainFrame extends JFrame {
 
 				jerk:synchronized (lines) {
 					if(Double.isInfinite(pair.getFirst().getX1())) {
-						panel.rePath();
+						panel.rePath(5000);
 					} else {
 						if(!Double.isNaN(pair.getFirst().getX1())) {
 							lines.add(pair.getFirst());

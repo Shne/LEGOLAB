@@ -78,7 +78,7 @@ public class LinesPanel extends DrawingPanel {
 		float fy = miny + (ly) * ((float) y) / ((float) PHEIGHT);
 		lastx = fx;
 		lasty = fy;
-		PathTo(fx, fy);
+		rePath(0);
 	}
 
 	protected void forcePath(int x, int y) {
@@ -97,16 +97,17 @@ public class LinesPanel extends DrawingPanel {
 		}
 	}
 
-	protected void rePath() {
+	protected void rePath(final int wait) {
 		new Thread() {
 			public void run() {
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(wait);
 					if (pose.distanceTo(new Point(lastx, lasty)) > 1f)
 						PathTo(lastx, lasty);
 				} catch (InterruptedException e) {
 				}
 			}
+			{setDaemon(true);}
 		}.start();
 	}
 
@@ -118,34 +119,25 @@ public class LinesPanel extends DrawingPanel {
 			// l.x1, l.y1, l.x2, l.y2 is the original line
 			// lines2.add(new Line(l.x1, l.y1, l.x2, l.y2)); //adding only the
 			// original line
-			float d = PATHFINDING_D;
-			Point a = new Point(l.x1, l.y1);
-			Point b = new Point(l.x2, l.y2);
-			Point v = b.subtract(a);
-			Point o1 = v.multiply(d).multiply(1 / v.length());
-			Point o2 = new Point(o1.y, -o1.x).multiply(0.4f);
 
-			Point p1 = b.add(o1).add(o2);
-			Point p2 = b.add(o1).subtract(o2);
-			Point p3 = a.subtract(o1).subtract(o2);
-			Point p4 = a.subtract(o1).add(o2);
-			
+			Point[] pts = expandLine(l);
+
 			Path2D.Double p = new Path2D.Double();
-			
-			p.moveTo(p1.x, p1.y);
-			p.lineTo(p2.x, p2.y);
-			p.lineTo(p3.x, p3.y);
-			p.lineTo(p4.x, p4.y);
-			p.lineTo(p1.x, p1.y);
-			
-			if(p.contains(pose.getX(), pose.getY()) || p.contains(fx, fy))
+
+			p.moveTo(pts[0].x, pts[0].y);
+			p.lineTo(pts[1].x, pts[1].y);
+			p.lineTo(pts[2].x, pts[2].y);
+			p.lineTo(pts[3].x, pts[3].y);
+			p.lineTo(pts[0].x, pts[0].y);
+
+			if (p.contains(pose.getX(), pose.getY()) || p.contains(fx, fy))
 				continue;
-			
+
 			synchronized (lines2) {
-				lines2.add(new Line(p1.x, p1.y, p2.x, p2.y));
-				lines2.add(new Line(p2.x, p2.y, p3.x, p3.y));
-				lines2.add(new Line(p3.x, p3.y, p4.x, p4.y));
-				lines2.add(new Line(p4.x, p4.y, p1.x, p1.y));
+				lines2.add(new Line(pts[0].x, pts[0].y, pts[1].x, pts[1].y));
+				lines2.add(new Line(pts[1].x, pts[1].y, pts[2].x, pts[2].y));
+				lines2.add(new Line(pts[2].x, pts[2].y, pts[3].x, pts[3].y));
+				lines2.add(new Line(pts[3].x, pts[3].y, pts[0].x, pts[0].y));
 			}
 		}
 		LineMap lm = new LineMap(((Line[]) lines2.toArray(new Line[lines2
@@ -153,7 +145,7 @@ public class LinesPanel extends DrawingPanel {
 				maxy + 1f));
 
 		ShortestPathFinder pather = new ShortestPathFinder(lm);
-		// pather.lengthenLines(20f);
+		pather.lengthenLines(0.1f);
 		Path path = null;
 		try {
 			path = pather.findRoute(pose, new Waypoint(fx, fy));
@@ -176,6 +168,21 @@ public class LinesPanel extends DrawingPanel {
 			waypoints.addAll(path);
 			waypoints.notifyAll();
 		}
+	}
+
+	private Point[] expandLine(Line l) {
+		float d = PATHFINDING_D;
+		Point a = new Point(l.x1, l.y1);
+		Point b = new Point(l.x2, l.y2);
+		Point v = b.subtract(a);
+		Point o1 = v.multiply(d).multiply(1 / v.length());
+		Point o2 = new Point(o1.y, -o1.x).multiply(0.4f);
+
+		Point p1 = b.add(o1).add(o2);
+		Point p2 = b.add(o1).subtract(o2);
+		Point p3 = a.subtract(o1).subtract(o2);
+		Point p4 = a.subtract(o1).add(o2);
+		return new Point[] { p1, p2, p3, p4 };
 	}
 
 	private void pruneLines(ArrayList<Line> lines) {
@@ -253,6 +260,8 @@ public class LinesPanel extends DrawingPanel {
 
 	int counter = 0;
 
+	Line lastLine = null;
+
 	private void loop() {
 		while (true) {
 			try {
@@ -263,6 +272,42 @@ public class LinesPanel extends DrawingPanel {
 						pruneLines(lines);
 
 					Line newLine = lines.get(lines.size() - 1);
+
+					if (newLine != lastLine) {
+
+						Point[] pts = expandLine(newLine);
+
+						Line[] newPathLines = new Line[4];
+
+						if (!Float.isNaN(pts[0].x)) {
+
+							newPathLines[0] = new Line(pts[0].x, pts[0].y,
+									pts[1].x, pts[1].y);
+							newPathLines[1] = new Line(pts[1].x, pts[1].y,
+									pts[2].x, pts[2].y);
+							newPathLines[2] = new Line(pts[2].x, pts[2].y,
+									pts[3].x, pts[3].y);
+							newPathLines[3] = new Line(pts[3].x, pts[3].y,
+									pts[0].x, pts[0].y);
+
+							outer: for (int i = 0; i < 4; ++i) {
+								for (Line l : pathses) {
+									if (newPathLines[i].intersectsLine(l)) {
+										synchronized (waypoints) {
+											waypoints.clear();
+											waypoints.notify();
+										}
+										rePath(0);
+										
+										
+										break outer;
+									}
+								}
+							}
+						}
+
+						lastLine = newLine;
+					}
 
 					maxx = Float.MIN_VALUE;
 					maxy = Float.MIN_VALUE;
@@ -311,7 +356,7 @@ public class LinesPanel extends DrawingPanel {
 							int y1 = (int) (((l.y1 - miny) / ly) * PHEIGHT);
 							int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
 							int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
-							paintLine(x1, y1, x2, y2, Color.CYAN);
+							//paintLine(x1, y1, x2, y2, Color.CYAN);
 						}
 					}
 
