@@ -297,6 +297,7 @@ public class LinesPanel extends DrawingPanel {
 											waypoints.clear();
 											waypoints.notify();
 										}
+										pathses.clear();
 										rePath(0);
 										
 										
