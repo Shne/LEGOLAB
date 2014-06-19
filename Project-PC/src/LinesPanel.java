@@ -115,6 +115,7 @@ public class LinesPanel extends DrawingPanel {
 		System.out.println(fx);
 		System.out.println(fy);
 		lines2.clear();
+		ArrayList<Line> copylines = (ArrayList<Line>)lines.clone();
 		for (Line l : lines) {
 			// l.x1, l.y1, l.x2, l.y2 is the original line
 			// lines2.add(new Line(l.x1, l.y1, l.x2, l.y2)); //adding only the
