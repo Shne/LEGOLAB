@@ -131,7 +131,10 @@ public class LinesPanel extends DrawingPanel {
 			p.lineTo(pts[0].x, pts[0].y);
 
 			if (p.contains(pose.getX(), pose.getY()) || p.contains(fx, fy))
+			{
+				lines2.add(l);
 				continue;
+			}
 
 			synchronized (lines2) {
 				lines2.add(new Line(pts[0].x, pts[0].y, pts[1].x, pts[1].y));
@@ -357,7 +360,7 @@ public class LinesPanel extends DrawingPanel {
 							int y1 = (int) (((l.y1 - miny) / ly) * PHEIGHT);
 							int x2 = (int) (((l.x2 - minx) / lx) * PWIDTH);
 							int y2 = (int) (((l.y2 - miny) / ly) * PHEIGHT);
-							//paintLine(x1, y1, x2, y2, Color.CYAN);
+							paintLine(x1, y1, x2, y2, Color.CYAN);
 						}
 					}
 
